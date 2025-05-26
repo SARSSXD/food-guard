@@ -28,4 +28,6 @@ Route::middleware(['auth', 'role:user'])->group(function () {
 });
 
 // Redirect root ke login
-Route::get('/', fn() => redirect('/login'));
+Route::get('/', function () {
+    return view('welcome');
+});
