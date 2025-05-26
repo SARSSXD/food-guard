@@ -2,27 +2,14 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class ProduksiPangan extends Model
 {
-    use HasFactory;
-
     protected $primaryKey = 'Id_produksipangan';
-    protected $fillable = [
-        'komoditas',
-        'volume',
-        'Id_lokasi',
-        'waktu',
-        'status_valid',
-        'created_by',
-    ];
-
-    protected $casts = [
-        'status_valid' => 'string',
-        'waktu' => 'date',
-    ];
+    protected $table = 'produksi_pangan';
+    protected $fillable = ['komoditas', 'volume', 'Id_lokasi', 'waktu', 'status_valid', 'created_by'];
+    protected $dates = ['waktu'];
 
     public function lokasi()
     {

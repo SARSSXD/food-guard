@@ -13,17 +13,17 @@ class LokasiSeeder extends Seeder
             [
                 'Id_lokasi' => 1,
                 'name' => 'Jawa Barat',
-                'Id_parent' => null,
+                'created_at' => now(),
             ],
             [
                 'Id_lokasi' => 2,
                 'name' => 'Jawa Timur',
-                'Id_parent' => null,
+                'created_at' => now(),
             ],
             [
                 'Id_lokasi' => 3,
-                'name' => 'DKI Jakarta',
-                'Id_parent' => null,
+                'name' => 'Jawa Tengah',
+                'created_at' => now(),
             ],
         ];
 

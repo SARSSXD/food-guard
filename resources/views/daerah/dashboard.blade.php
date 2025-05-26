@@ -1,72 +1,72 @@
-@extends('nasional.layout.main')
-
-@section('title', 'Dashboard Admin')
+@extends('daerah.layouts.app')
 
 @section('content')
-
-    <!-- Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        @php
-            $cards = [
-                ['title' => 'Data Mahasiswa', 'value' => 120, 'color' => 'bg-blue-100 text-blue-800'],
-                ['title' => 'Data Dosen', 'value' => 30, 'color' => 'bg-green-100 text-green-800'],
-                ['title' => 'Penjadwalan Sempro', 'value' => 15, 'color' => 'bg-yellow-100 text-yellow-800'],
-                ['title' => 'Hasil', 'value' => '80%', 'color' => 'bg-red-100 text-red-800'],
-            ];
-        @endphp
-
-        @foreach ($cards as $card)
-            <div class="rounded-2xl p-6 shadow hover:shadow-md transition duration-300 {{ $card['color'] }} bg-opacity-50">
-                <h2 class="text-lg font-semibold mb-2">{{ $card['title'] }}</h2>
-                <p class="text-3xl font-bold">{{ $card['value'] }}</p>
+    <div class="row">
+        <div class="col-lg-12 grid-margin stretch-card">
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="card-title">Data Produksi Pangan Terbaru</h4>
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Komoditas</th>
+                                    <th>Volume (Ton)</th>
+                                    <th>Lokasi</th>
+                                    <th>Waktu</th>
+                                    <th>Status Validasi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($produksiPangan as $data)
+                                    <tr>
+                                        <td>{{ $data->komoditas }}</td>
+                                        <td>{{ $data->volume }}</td>
+                                        <td>{{ $data->lokasi->name }}</td>
+                                        <td>{{ \Carbon\Carbon::parse($data->waktu)->format('d M Y') }}</td>
+                                        <td>{{ $data->status_valid }}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
-        @endforeach
-    </div>
-
-    <!-- Chart Section -->
-    <div class="bg-white rounded-2xl shadow p-6">
-        <h2 class="text-xl font-semibold mb-4">Statistik</h2>
-        <canvas id="myChart" class="w-full h-64"></canvas>
+        </div>
+        <div class="col-lg-12 grid-margin stretch-card">
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="card-title">Input Data Produksi Pangan</h4>
+                    <form method="POST" action="{{ url('daerah/produksi/store') }}">
+                        @csrf
+                        <div class="form-group">
+                            <label for="komoditas">Komoditas</label>
+                            <select class="form-control" id="komoditas" name="komoditas" required>
+                                <option value="Beras">Beras</option>
+                                <option value="Jagung">Jagung</option>
+                                <option value="Kedelai">Kedelai</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="volume">Volume (Ton)</label>
+                            <input type="number" class="form-control" id="volume" name="volume" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="lokasi">Lokasi</label>
+                            <select class="form-control" id="lokasi" name="Id_lokasi" required>
+                                @foreach ($lokasi as $l)
+                                    <option value="{{ $l->Id_lokasi }}">{{ $l->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="waktu">Waktu</label>
+                            <input type="date" class="form-control" id="waktu" name="waktu" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Simpan</button>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
 @endsection
-
-@push('scripts')
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-    const ctx = document.getElementById('myChart').getContext('2d');
-    const myChart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: ['Mahasiswa', 'Dosen', 'Sempro', 'Hasil'],
-            datasets: [{
-                label: 'Jumlah',
-                data: [120, 30, 15, 80],
-                backgroundColor: ['#3B82F6', '#10B981', '#FBBF24', '#EF4444'],
-                borderRadius: 10,
-                barThickness: 40,
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: {
-                    display: false
-                }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: {
-                        color: '#4B5563'
-                    }
-                },
-                x: {
-                    ticks: {
-                        color: '#4B5563'
-                    }
-                }
-            }
-        }
-    });
-</script>
-@endpush

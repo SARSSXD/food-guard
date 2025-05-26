@@ -1,20 +1,57 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard User - Food-Guard</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-</head>
-<body class="bg-gray-100">
-    <div class="container mx-auto p-4">
-        <h1 class="text-2xl font-bold text-gray-800">user</h1>
-        <form method="POST" action="{{ route('logout') }}">
-            @csrf
-            <button type="submit" class="mt-4 bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-200">
-                Logout
-            </button>
-        </form>
+@extends('user.layouts.app')
+
+@section('content')
+    <div class="row">
+        <div class="col-lg-12 grid-margin stretch-card">
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="card-title">Data Produksi Pangan</h4>
+                    <div class="form-group mb-3">
+                        <label for="komoditas">Filter Komoditas</label>
+                        <select class="form-control" id="komoditas">
+                            <option value="">Semua</option>
+                            <option value="Beras">Beras</option>
+                            <option value="Jagung">Jagung</option>
+                            <option value="Kedelai">Kedelai</option>
+                        </select>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="lokasi">Filter Lokasi</label>
+                        <select class="form-control" id="lokasi">
+                            <option value="">Semua</option>
+                            <option value="Jawa Barat">Jawa Barat</option>
+                            <option value="Jawa Timur">Jawa Timur</option>
+                        </select>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Komoditas</th>
+                                    <th>Volume (Ton)</th>
+                                    <th>Lokasi</th>
+                                    <th>Waktu</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Data dummy untuk ilustrasi -->
+                                <tr>
+                                    <td>Beras</td>
+                                    <td>5000</td>
+                                    <td>Jawa Barat</td>
+                                    <td>25 Mei 2025</td>
+                                </tr>
+                                <tr>
+                                    <td>Jagung</td>
+                                    <td>3000</td>
+                                    <td>Jawa Timur</td>
+                                    <td>24 Mei 2025</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-</body>
-</html>
+@endsection

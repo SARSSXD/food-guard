@@ -1,90 +1,75 @@
 <nav class="sidebar sidebar-offcanvas" id="sidebar">
     <ul class="nav">
         <li class="nav-item sidebar-category">
-            <p>Navigation</p>
+            <p>Navigasi</p>
             <span></span>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="{{ url('/dashboard') }}">
-                <i class="mdi mdi-view-quilt menu-icon"></i>
+            <a class="nav-link" href="{{ route('daerah.dashboard') }}">
+                <i class="mdi mdi-view-dashboard menu-icon"></i>
                 <span class="menu-title">Dashboard</span>
-                <div class="badge badge-info badge-pill">2</div>
             </a>
         </li>
         <li class="nav-item sidebar-category">
-            <p>Components</p>
+            <p>Input Data</p>
             <span></span>
         </li>
         <li class="nav-item">
-            <a class="nav-link" data-bs-toggle="collapse" href="#ui-basic" aria-expanded="false" aria-controls="ui-basic">
-                <i class="mdi mdi-palette menu-icon"></i>
-                <span class="menu-title">UI Elements</span>
-                <i class="menu-arrow"></i>
-            </a>
-            <div class="collapse" id="ui-basic">
-                <ul class="nav flex-column sub-menu">
-                    <li class="nav-item"><a class="nav-link" href="{{ url('ui/buttons') }}">Buttons</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{{ url('ui/typography') }}">Typography</a></li>
-                </ul>
-            </div>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" href="{{ url('forms') }}">
-                <i class="mdi mdi-view-headline menu-icon"></i>
-                <span class="menu-title">Form elements</span>
+            <a class="nav-link" href="{{ url('daerah/produksi') }}">
+                <i class="mdi mdi-sprout menu-icon"></i>
+                <span class="menu-title">Produksi Pangan</span>
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="{{ url('charts') }}">
-                <i class="mdi mdi-chart-pie menu-icon"></i>
-                <span class="menu-title">Charts</span>
+            <a class="nav-link" href="{{ url('daerah/cadangan') }}">
+                <i class="mdi mdi-warehouse menu-icon"></i>
+                <span class="menu-title">Cadangan Pangan</span>
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="{{ url('tables') }}">
-                <i class="mdi mdi-grid-large menu-icon"></i>
-                <span class="menu-title">Tables</span>
+            <a class="nav-link" href="{{ url('daerah/harga') }}">
+                <i class="mdi mdi-currency-usd menu-icon"></i>
+                <span class="menu-title">Harga Pangan</span>
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="{{ url('icons') }}">
-                <i class="mdi mdi-emoticon menu-icon"></i>
-                <span class="menu-title">Icons</span>
+            <a class="nav-link" href="{{ url('daerah/distribusi') }}">
+                <i class="mdi mdi-truck menu-icon"></i>
+                <span class="menu-title">Distribusi Pangan</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{{ url('daerah/bantuan') }}">
+                <i class="mdi mdi-hand-okay menu-icon"></i>
+                <span class="menu-title">Bantuan/Subsidi</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{{ url('daerah/penyuluhan') }}">
+                <i class="mdi mdi-school menu-icon"></i>
+                <span class="menu-title">Penyuluhan</span>
             </a>
         </li>
         <li class="nav-item sidebar-category">
-            <p>Pages</p>
+            <p>Manajemen</p>
             <span></span>
         </li>
         <li class="nav-item">
-            <a class="nav-link" data-bs-toggle="collapse" href="#auth" aria-expanded="false" aria-controls="auth">
-                <i class="mdi mdi-account menu-icon"></i>
-                <span class="menu-title">User Pages</span>
-                <i class="menu-arrow"></i>
-            </a>
-            <div class="collapse" id="auth">
-                <ul class="nav flex-column sub-menu">
-                    <li class="nav-item"><a class="nav-link" href="{{ url('auth/login') }}">Login</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{{ url('auth/login-2') }}">Login 2</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{{ url('auth/register') }}">Register</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{{ url('auth/register-2') }}">Register 2</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{{ url('auth/lockscreen') }}">Lockscreen</a></li>
-                </ul>
-            </div>
-        </li>
-        <li class="nav-item sidebar-category">
-            <p>Apps</p>
-            <span></span>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" href="{{ url('docs') }}">
-                <i class="mdi mdi-file-document-box-outline menu-icon"></i>
-                <span class="menu-title">Documentation</span>
+            <a class="nav-link" href="{{ url('daerah/prediksi') }}">
+                <i class="mdi mdi-chart-line menu-icon"></i>
+                <span class="menu-title">Prediksi Produksi</span>
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="http://www.bootstrapdash.com/demo/spica/template/">
-                <button class="btn btn-sm btn-danger menu-title">Upgrade to pro</button>
+            <a class="nav-link" href="{{ url('daerah/early-warning') }}">
+                <i class="mdi mdi-alert menu-icon"></i>
+                <span class="menu-title">Peringatan Dini</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{{ url('daerah/laporan') }}">
+                <i class="mdi mdi-message-text menu-icon"></i>
+                <span class="menu-title">Laporan Masyarakat</span>
             </a>
         </li>
     </ul>

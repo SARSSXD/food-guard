@@ -12,51 +12,57 @@ class UserSeeder extends Seeder
     {
         $users = [
             [
+                'Id_users' => 1,
                 'name' => 'Admin Nasional',
                 'email' => 'admin@foodguard.com',
                 'password' => Hash::make('password'),
                 'role' => 'nasional',
-                'Id_region' => null, // National admin, no specific region
+                'Id_region' => null,
                 'created_at' => now(),
             ],
             [
+                'Id_users' => 2,
                 'name' => 'Admin Jawa Barat',
                 'email' => 'admin.jabar@region.foodguard.com',
                 'password' => Hash::make('password'),
                 'role' => 'daerah',
-                'Id_region' => 1, // Assuming Id_lokasi 1 is Jawa Barat
+                'Id_region' => 1,
                 'created_at' => now(),
             ],
             [
+                'Id_users' => 3,
                 'name' => 'Admin Jawa Timur',
                 'email' => 'admin.jatim@region.foodguard.com',
                 'password' => Hash::make('password'),
                 'role' => 'daerah',
-                'Id_region' => 2, // Assuming Id_lokasi 2 is Jawa Timur
+                'Id_region' => 2,
                 'created_at' => now(),
             ],
             [
+                'Id_users' => 4,
                 'name' => 'Budi Santoso',
                 'email' => 'budi@public.foodguard.com',
                 'password' => Hash::make('password'),
                 'role' => 'user',
-                'Id_region' => 1, // Jawa Barat
+                'Id_region' => 1,
                 'created_at' => now(),
             ],
             [
+                'Id_users' => 5,
                 'name' => 'Siti Aminah',
                 'email' => 'siti@public.foodguard.com',
                 'password' => Hash::make('password'),
                 'role' => 'user',
-                'Id_region' => 2, // Jawa Timur
+                'Id_region' => 2,
                 'created_at' => now(),
             ],
             [
+                'Id_users' => 6,
                 'name' => 'Andi Wijaya',
                 'email' => 'andi@public.foodguard.com',
                 'password' => Hash::make('password'),
                 'role' => 'user',
-                'Id_region' => 3, // Assuming Id_lokasi 3 is DKI Jakarta
+                'Id_region' => 2,
                 'created_at' => now(),
             ],
         ];

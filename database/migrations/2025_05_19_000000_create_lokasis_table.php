@@ -12,6 +12,7 @@ return new class extends Migration
             $table->id('Id_lokasi');
             $table->string('name');
             $table->foreignId('Id_parent')->nullable()->constrained('lokasi', 'Id_lokasi')->onDelete('cascade');
+            $table->timestamps();
         });
     }
 

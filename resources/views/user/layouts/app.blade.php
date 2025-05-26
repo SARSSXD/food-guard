@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title>Admin Nasional - Food-Guard</title>
+    <title>User Umum - Food-Guard</title>
     <link rel="stylesheet" href="{{ asset('assets/css/vendor.bundle.base.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/style.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/custom.css') }}">
@@ -14,22 +14,22 @@
 
 <body>
     <div class="container-scroller d-flex">
-        @include('nasional.layouts.partials.sidebar')
+        @include('user.layouts.partials.sidebar')
         <div class="container-fluid page-body-wrapper">
-            @include('nasional.layouts.partials.navbar')
+            @include('user.layouts.partials.navbar')
             <div class="main-panel">
                 <div class="content-wrapper">
                     @yield('content')
                 </div>
-                @include('nasional.layouts.partials.footer')
+                @include('user.layouts.partials.footer')
             </div>
         </div>
     </div>
     <script src="{{ asset('assets/js/vendor.bundle.base.js') }}"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script src="{{ asset('assets/js/chart.js/Chart.min.js') }}"></script>
     <script src="{{ asset('assets/js/off-canvas.js') }}"></script>
-    <script src="{{ asset('assets/js/hoverable-collapse.js') }}"></script>
-    <script src="{{ asset('assets/js/template.js') }}"></script>
+    <script src="{{ asset('assets/js/hoverable-collapse.js') }}</script>
+        <script src=" {{ asset('assets/js/template.js') }}"></script>
     <script src="{{ asset('assets/js/dashboard.js') }}"></script>
     <script src="{{ asset('assets/js/navbar-scroll.js') }}"></script>
 </body>

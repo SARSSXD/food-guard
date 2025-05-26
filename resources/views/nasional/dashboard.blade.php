@@ -1,72 +1,123 @@
-@extends('nasional.layout.main')
-
-@section('title', 'Dashboard Admin')
+@extends('nasional.layouts.app')
 
 @section('content')
-
-    <!-- Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        @php
-            $cards = [
-                ['title' => 'Data Mahasiswa', 'value' => 120, 'color' => 'bg-blue-100 text-blue-800'],
-                ['title' => 'Data Dosen', 'value' => 30, 'color' => 'bg-green-100 text-green-800'],
-                ['title' => 'Penjadwalan Sempro', 'value' => 15, 'color' => 'bg-yellow-100 text-yellow-800'],
-                ['title' => 'Hasil', 'value' => '80%', 'color' => 'bg-red-100 text-red-800'],
-            ];
-        @endphp
-
-        @foreach ($cards as $card)
-            <div class="rounded-2xl p-6 shadow hover:shadow-md transition duration-300 {{ $card['color'] }} bg-opacity-50">
-                <h2 class="text-lg font-semibold mb-2">{{ $card['title'] }}</h2>
-                <p class="text-3xl font-bold">{{ $card['value'] }}</p>
+    <div class="row">
+        @if ($pendingCount > 0)
+            <div class="col-lg-12 grid-margin">
+                <div class="alert alert-warning" role="alert">
+                    <strong>Peringatan:</strong> Ada {{ $pendingCount }} data produksi pangan dengan status "pending" yang
+                    belum divalidasi lebih dari 3 hari.
+                </div>
             </div>
-        @endforeach
+        @endif
+        <div class="col-lg-12 grid-margin stretch-card">
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="card-title">Data Produksi Pangan per Daerah</h4>
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Komoditas</th>
+                                    <th>Volume (Ton)</th>
+                                    <th>Lokasi</th>
+                                    <th>Waktu</th>
+                                    <th>Status Validasi</th>
+                                    <th>Pembuat</th>
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($produksiPangan as $data)
+                                    <tr>
+                                        <td>{{ $data->komoditas }}</td>
+                                        <td>{{ number_format($data->volume, 2) }}</td>
+                                        <td>{{ $data->lokasi->name }}</td>
+                                        <td>{{ \Carbon\Carbon::parse($data->waktu)->format('d M Y') }}</td>
+                                        <td>
+                                            <span
+                                                class="badge {{ $data->status_valid == 'terverifikasi' ? 'badge-success' : 'badge-warning' }}">
+                                                {{ ucfirst($data->status_valid) }}
+                                            </span>
+                                        </td>
+                                        <td>{{ $data->creator->name }}</td>
+                                        <td>
+                                            @if ($data->status_valid == 'pending')
+                                                <form method="POST"
+                                                    action="{{ url('nasional/produksi/validasi/' . $data->Id_produksipangan) }}">
+                                                    @csrf
+                                                    @method('PATCH')
+                                                    <button type="submit" class="btn btn-sm btn-primary">Validasi</button>
+                                                </form>
+                                            @else
+                                                <button class="btn btn-sm btn-success" disabled>Sudah Terverifikasi</button>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-12 grid-margin stretch-card">
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="card-title">Tren Produksi Pangan Nasional</h4>
+                    @if (empty($datasets) || collect($datasets)->pluck('data')->flatten()->sum() == 0)
+                        <p class="text-muted">Tidak ada data produksi pangan yang tersedia untuk ditampilkan di grafik.</p>
+                    @else
+                        <canvas id="produksi-chart"></canvas>
+                    @endif
+                </div>
+            </div>
+        </div>
     </div>
-
-    <!-- Chart Section -->
-    <div class="bg-white rounded-2xl shadow p-6">
-        <h2 class="text-xl font-semibold mb-4">Statistik</h2>
-        <canvas id="myChart" class="w-full h-64"></canvas>
-    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Datasets:', @json($datasets));
+            console.log('Labels:', @json($labels));
+            @if (!empty($datasets) && collect($datasets)->pluck('data')->flatten()->sum() > 0)
+                try {
+                    var ctx = document.getElementById('produksi-chart').getContext('2d');
+                    var chart = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: @json($labels),
+                            datasets: @json($datasets)
+                        },
+                        options: {
+                            responsive: true,
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    title: {
+                                        display: true,
+                                        text: 'Volume (Ton)'
+                                    }
+                                },
+                                x: {
+                                    title: {
+                                        display: true,
+                                        text: 'Bulan'
+                                    }
+                                }
+                            },
+                            plugins: {
+                                legend: {
+                                    display: true,
+                                    position: 'top'
+                                }
+                            }
+                        }
+                    });
+                } catch (error) {
+                    console.error('Error rendering chart:', error);
+                }
+            @else
+                console.log('No data available for chart.');
+            @endif
+        });
+    </script>
 @endsection
-
-@push('scripts')
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-    const ctx = document.getElementById('myChart').getContext('2d');
-    const myChart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: ['Mahasiswa', 'Dosen', 'Sempro', 'Hasil'],
-            datasets: [{
-                label: 'Jumlah',
-                data: [120, 30, 15, 80],
-                backgroundColor: ['#3B82F6', '#10B981', '#FBBF24', '#EF4444'],
-                borderRadius: 10,
-                barThickness: 40,
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: {
-                    display: false
-                }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: {
-                        color: '#4B5563'
-                    }
-                },
-                x: {
-                    ticks: {
-                        color: '#4B5563'
-                    }
-                }
-            }
-        }
-    });
-</script>
-@endpush

@@ -6,8 +6,8 @@
                     2025</span>
                 <span class="text-muted d-block text-center text-sm-left d-sm-inline-block">Dikembangkan oleh Tim
                     Food-Guard</span>
-                <span class="float-none float-sm-right d-block mt-1 mt-sm-0 text-center">Sistem Ketahanan Pangan
-                    Nasional</span>
+                <span class="float-none float-sm-right d-block mt-1 mt-sm-0 text-center">Informasi Ketahanan Pangan untuk
+                    Masyarakat</span>
             </div>
         </div>
     </div>
