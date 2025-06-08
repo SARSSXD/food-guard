@@ -6,7 +6,7 @@
         </button>
         <div class="navbar-brand-wrapper">
             <a class="navbar-brand brand-logo" href="{{ route('nasional.dashboard') }}"><img
-                    src="{{ asset('assets/images/foodguard-logo.svg') }}" alt="logo" /></a>
+                    src="{{ asset('assets/img/logoFG.jpg') }}" width="50" alt="logo" /></a>
             <a class="navbar-brand brand-logo-mini" href="{{ route('nasional.dashboard') }}"><img
                     src="{{ asset('assets/images/foodguard-logo-mini.svg') }}" alt="logo" /></a>
         </div>
@@ -55,7 +55,7 @@
         </ul>
         <ul class="navbar-nav navbar-nav-right">
             <li class="nav-item nav-profile dropdown">
-                <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" id="profileDropdown">
+                <a class="nav-link dropdown-toggle" href="{{ route('logout') }}" data-bs-toggle="dropdown" id="profileDropdown">
                     <img src="{{ asset('assets/images/faces/face5.jpg') }}" alt="profile" />
                     <span class="nav-profile-name">{{ auth()->user()->name }}</span>
                 </a>

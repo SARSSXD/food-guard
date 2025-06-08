@@ -8,10 +8,10 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('lokasi', function (Blueprint $table) {
-            $table->id('Id_lokasi');
-            $table->string('name');
-            $table->foreignId('Id_parent')->nullable()->constrained('lokasi', 'Id_lokasi')->onDelete('cascade');
+        Schema::create('wilayah', function (Blueprint $table) {
+            $table->id('id');
+            $table->string('provinsi');
+            $table->string('kota');
             $table->timestamps();
         });
     }

@@ -9,13 +9,13 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('harga_pangan', function (Blueprint $table) {
-            $table->id('Id_hargapangan');
+            $table->id('id');
             $table->string('nama_pasar');
             $table->string('komoditas');
             $table->float('harga_per_kg');
-            $table->foreignId('Id_lokasi')->constrained('lokasi', 'Id_lokasi')->onDelete('cascade');
+            $table->foreignId('id_lokasi')->constrained('wilayah', 'id')->onDelete('cascade');
             $table->date('tanggal');
-            $table->foreignId('created_by')->constrained('users', 'Id_users')->onDelete('cascade');
+            $table->foreignId('created_by')->constrained('users', 'id')->onDelete('cascade');
             $table->timestamps();
         });
     }

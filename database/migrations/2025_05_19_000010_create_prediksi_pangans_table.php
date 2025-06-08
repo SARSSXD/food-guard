@@ -9,15 +9,15 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('prediksi_pangan', function (Blueprint $table) {
-            $table->id('Id_prediksipangan');
+            $table->id('id');
             $table->enum('jenis', ['produksi', 'cadangan']);
             $table->string('komoditas');
-            $table->foreignId('Id_lokasi')->constrained('lokasi', 'Id_lokasi')->onDelete('cascade');
+            $table->foreignId('id_lokasi')->constrained('wilayah', 'id')->onDelete('cascade');
             $table->date('bulan_tahun');
-            $table->float('volume');
+            $table->float('jumlah');
             $table->string('metode');
             $table->enum('status', ['draft', 'disetujui', 'revisi']);
-            $table->foreignId('created_by')->constrained('users', 'Id_users')->onDelete('cascade');
+            $table->foreignId('created_by')->constrained('users', 'id')->onDelete('cascade');
             $table->timestamps();
         });
     }

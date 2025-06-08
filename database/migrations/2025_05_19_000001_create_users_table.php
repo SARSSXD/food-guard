@@ -12,14 +12,14 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('users', function (Blueprint $table) {
-            $table->id('Id_users');
+            $table->id('id');
             $table->string('name');
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->enum('role', ['nasional', 'daerah', 'user']);
-            $table->foreignId('Id_region')->nullable()->constrained('lokasi', 'Id_lokasi')->onDelete('set null');
-            $table->timestamp('created_at')->nullable();
+            $table->foreignId('id_region')->nullable()->constrained('wilayah', 'id')->onDelete('set null');
+            $table->timestamps();
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {

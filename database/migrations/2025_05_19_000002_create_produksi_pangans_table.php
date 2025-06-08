@@ -9,13 +9,12 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('produksi_pangan', function (Blueprint $table) {
-            $table->id('Id_produksipangan');
+            $table->id('id');
             $table->string('komoditas');
-            $table->float('volume');
-            $table->foreignId('Id_lokasi')->constrained('lokasi', 'Id_lokasi')->onDelete('cascade');
-            $table->date('waktu');
+            $table->float('jumlah');
+            $table->foreignId('id_lokasi')->constrained('wilayah', 'id')->onDelete('cascade');
             $table->enum('status_valid', ['terverifikasi', 'pending']);
-            $table->foreignId('created_by')->constrained('users', 'Id_users')->onDelete('cascade');
+            $table->foreignId('created_by')->constrained('users', 'id')->onDelete('cascade');
             $table->timestamps();
         });
     }

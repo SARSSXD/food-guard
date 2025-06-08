@@ -4,7 +4,7 @@
             <span class="mdi mdi-menu"></span>
         </button>
         <div class="navbar-brand-wrapper">
-            <a class="navbar-brand brand-logo" href="{{ route('daerah.dashboard') }}"><img src="{{ asset('assets/images/foodguard-logo.svg') }}" alt="logo"/></a>
+            <a class="navbar-brand brand-logo" href="{{ route('daerah.dashboard') }}"><img src="{{ asset('assets/img/logoFG.jpg') }}" width="50" alt="logo"/></a>
             <a class="navbar-brand brand-logo-mini" href="{{ route('daerah.dashboard') }}"><img src="{{ asset('assets/images/foodguard-logo-mini.svg') }}" alt="logo"/></a>
         </div>
         <h4 class="font-weight-bold mb-0 d-none d-md-block mt-1">Selamat datang, {{ auth()->user()->name }}</h4>

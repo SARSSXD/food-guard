@@ -5,27 +5,39 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * Class ArtikelGizi
+ *
+ * Represents nutrition articles in the food security system.
+ *
+ * @property int $id
+ * @property string $judul
+ * @property string $isi
+ * @property string $kategori
+ * @property int $id_penulis
+ * @property int $jumlah_akses
+ * @property \Illuminate\Support\Carbon $created_at
+ * @property \Illuminate\Support\Carbon $updated_at
+ */
 class ArtikelGizi extends Model
 {
     use HasFactory;
 
-    protected $primaryKey = 'Id_artikelgizi';
+    protected $table = 'artikel_gizi';
+
     protected $fillable = [
         'judul',
         'isi',
         'kategori',
-        'Id_penulis',
+        'id_penulis',
         'jumlah_akses',
-        'created_at',
     ];
 
-    protected $casts = [
-        'kategori' => 'string',
-        'created_at' => 'datetime',
-    ];
-
-    public function penulis()
+    /**
+     * Get the author of this nutrition article.
+     */
+    public function author()
     {
-        return $this->belongsTo(User::class, 'Id_penulis', 'Id_users');
+        return $this->belongsTo(User::class, 'id_penulis');
     }
 }

@@ -6,7 +6,7 @@
         </button>
         <div class="navbar-brand-wrapper">
             <a class="navbar-brand brand-logo" href="{{ route('welcome') }}"><img
-                    src="{{ asset('assets/images/foodguard-logo.svg') }}" alt="logo" /></a>
+                    src="{{ asset('assets/img/logoFG.jpg') }}" width="50" alt="logo" /></a>
             <a class="navbar-brand brand-logo-mini" href="{{ route('welcome') }}"><img
                     src="{{ asset('assets/images/foodguard-logo-mini.svg') }}" alt="logo" /></a>
         </div>

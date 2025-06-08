@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\ProduksiPangan;
-use App\Models\Lokasi;
+use App\Models\Wilayah;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
@@ -12,7 +12,7 @@ class DashboardController extends Controller
 {
     public function nasional()
     {
-        $produksiPangan = ProduksiPangan::with('lokasi', 'creator')->orderBy('waktu', 'desc')->get();
+        $produksiPangan = ProduksiPangan::with('region', 'creator')->orderBy('waktu', 'desc')->get();
 
         // Data untuk grafik
         $grafikData = ProduksiPangan::selectRaw('komoditas, MONTH(waktu) as bulan, SUM(volume) as total_volume')
@@ -63,15 +63,15 @@ class DashboardController extends Controller
 
     public function daerah()
     {
-        $lokasi = Lokasi::all();
-        $produksiPangan = ProduksiPangan::with('lokasi')
-            ->whereHas('lokasi', function ($query) {
-                $query->where('Id_lokasi', Auth::user()->Id_region);
+        $wilayah = Wilayah::all();
+        $produksiPangan = ProduksiPangan::with('wilayah')
+            ->whereHas('wilayah', function ($query) {
+                $query->where('id_lokasi', Auth::user()->Id_region);
             })
             ->latest()
             ->take(5)
             ->get();
-        return view('daerah.dashboard', compact('lokasi', 'produksiPangan'));
+        return view('daerah.dashboard', compact('wilayah', 'produksiPangan'));
     }
 
     private function getColor($komoditas)

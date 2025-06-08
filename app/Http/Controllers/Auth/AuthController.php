@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
+use App\Models\Lokasi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -12,6 +14,13 @@ class AuthController extends Controller
     public function showLoginForm()
     {
         return view('auth.login');
+    }
+
+    // Menampilkan form register
+    public function showRegisterForm()
+    {
+        $lokasi = Lokasi::all();
+        return view('auth.register', compact('lokasi'));
     }
 
     // Proses login
@@ -65,6 +74,40 @@ class AuthController extends Controller
 
         // Jika autentikasi gagal
         return back()->withErrors(['email' => 'Email atau password salah.']);
+    }
+
+    // Proses register
+    public function register(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => 'required|string|min:6|confirmed',
+            'role' => 'required|in:nasional,daerah,user',
+            'Id_region' => 'required_if:role,daerah|nullable|exists:lokasi,Id_lokasi',
+        ]);
+
+        // Validasi domain email berdasarkan role
+        if ($request->role === 'nasional' && !str_ends_with($request->email, '@foodguard.com')) {
+            return back()->withErrors(['email' => 'Email untuk admin nasional harus menggunakan domain @foodguard.com.']);
+        }
+        if ($request->role === 'daerah' && !str_ends_with($request->email, '@region.foodguard.com')) {
+            return back()->withErrors(['email' => 'Email untuk admin daerah harus menggunakan domain @region.foodguard.com.']);
+        }
+        if ($request->role === 'user' && !str_ends_with($request->email, '@public.foodguard.com')) {
+            return back()->withErrors(['email' => 'Email untuk pengguna umum harus menggunakan domain @public.foodguard.com.']);
+        }
+
+        User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => bcrypt($request->password),
+            'role' => $request->role,
+            'Id_region' => $request->role === 'daerah' ? $request->Id_region : null,
+            'created_at' => now(),
+        ]);
+
+        return redirect()->route('login')->with('success', 'Registrasi berhasil. Silakan login.');
     }
 
     // Proses logout

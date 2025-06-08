@@ -2,22 +2,50 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * Class ProduksiPangan
+ *
+ * Represents food production data in the food security system.
+ *
+ * @property int $id
+ * @property string $komoditas
+ * @property float $jumlah
+ * @property int $id_lokasi
+ * @property string $status_valid
+ * @property int $created_by
+ * @property \Illuminate\Support\Carbon $created_at
+ * @property \Illuminate\Support\Carbon $updated_at
+ */
 class ProduksiPangan extends Model
 {
-    protected $primaryKey = 'Id_produksipangan';
-    protected $table = 'produksi_pangan';
-    protected $fillable = ['komoditas', 'volume', 'Id_lokasi', 'waktu', 'status_valid', 'created_by'];
-    protected $dates = ['waktu'];
+    use HasFactory;
 
-    public function lokasi()
+    protected $table = 'produksi_pangan';
+
+    protected $fillable = [
+        'komoditas',
+        'jumlah',
+        'id_lokasi',
+        'status_valid',
+        'created_by',
+    ];
+
+    /**
+     * Get the region associated with this food production data.
+     */
+    public function region()
     {
-        return $this->belongsTo(Lokasi::class, 'Id_lokasi', 'Id_lokasi');
+        return $this->belongsTo(Wilayah::class, 'id_lokasi');
     }
 
+    /**
+     * Get the user who created this food production data.
+     */
     public function creator()
     {
-        return $this->belongsTo(User::class, 'created_by', 'Id_users');
+        return $this->belongsTo(User::class, 'created_by');
     }
 }
