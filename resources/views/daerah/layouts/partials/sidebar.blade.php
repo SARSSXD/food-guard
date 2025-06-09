@@ -11,65 +11,43 @@
             </a>
         </li>
         <li class="nav-item sidebar-category">
-            <p>Input Data</p>
+            <p>Manajemen</p>
             <span></span>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="{{ url('daerah/produksi') }}">
+            <a class="nav-link" href="{{ route('daerah.produksi.index') }}">
                 <i class="mdi mdi-sprout menu-icon"></i>
                 <span class="menu-title">Produksi Pangan</span>
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="{{ url('daerah/cadangan') }}">
+            <a class="nav-link" href="{{ route('daerah.cadangan.index') }}">
                 <i class="mdi mdi-warehouse menu-icon"></i>
                 <span class="menu-title">Cadangan Pangan</span>
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="{{ url('daerah/harga') }}">
+            <a class="nav-link" href="{{ route('daerah.harga.index') }}">
                 <i class="mdi mdi-currency-usd menu-icon"></i>
                 <span class="menu-title">Harga Pangan</span>
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="{{ url('daerah/distribusi') }}">
+            <a class="nav-link" href="{{ route('daerah.distribusi.index') }}">
                 <i class="mdi mdi-truck menu-icon"></i>
                 <span class="menu-title">Distribusi Pangan</span>
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="{{ url('daerah/bantuan') }}">
-                <i class="mdi mdi-hand-okay menu-icon"></i>
-                <span class="menu-title">Bantuan/Subsidi</span>
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" href="{{ url('daerah/penyuluhan') }}">
-                <i class="mdi mdi-school menu-icon"></i>
-                <span class="menu-title">Penyuluhan</span>
-            </a>
-        </li>
-        <li class="nav-item sidebar-category">
-            <p>Manajemen</p>
-            <span></span>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" href="{{ url('daerah/prediksi') }}">
+            <a class="nav-link" href="{{ route('daerah.prediksi.index') }}">
                 <i class="mdi mdi-chart-line menu-icon"></i>
                 <span class="menu-title">Prediksi Produksi</span>
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="{{ url('daerah/early-warning') }}">
-                <i class="mdi mdi-alert menu-icon"></i>
-                <span class="menu-title">Peringatan Dini</span>
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" href="{{ url('daerah/laporan') }}">
-                <i class="mdi mdi-message-text menu-icon"></i>
-                <span class="menu-title">Laporan Masyarakat</span>
+            <a class="nav-link" href="{{ route('daerah.artikel.index') }}">
+                <i class="mdi mdi-book-open-page-variant menu-icon"></i>
+                <span class="menu-title">Artikel Gizi</span>
             </a>
         </li>
     </ul>

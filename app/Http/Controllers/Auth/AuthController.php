@@ -4,62 +4,43 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
-use App\Models\Lokasi;
+use App\Models\Wilayah;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
-    // Menampilkan form login
     public function showLoginForm()
     {
         return view('auth.login');
     }
 
-    // Menampilkan form register
     public function showRegisterForm()
     {
-        $lokasi = Lokasi::all();
-        return view('auth.register', compact('lokasi'));
+        $wilayah = Wilayah::all();
+        return view('auth.register', compact('wilayah'));
     }
 
-    // Proses login
     public function login(Request $request)
     {
-        // Validasi input
         $request->validate([
             'email' => 'required|email',
             'password' => 'required|string|min:6',
         ]);
 
-        // Ambil kredensial
         $credentials = $request->only('email', 'password');
 
-        // Coba autentikasi
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
+            $user = Auth::user();
 
-            // Ambil role pengguna setelah autentikasi berhasil
-            $role = Auth::user()->role;
-
-            // Validasi domain email berdasarkan role
-            if (str_ends_with($request->email, '@foodguard.com') && $role !== 'nasional') {
+            if (!$this->validateEmailDomain($request->email, $user->role)) {
                 Auth::logout();
-                return back()->withErrors(['email' => 'Email ini hanya untuk admin nasional.']);
+                return back()->withErrors(['email' => $this->getEmailErrorMessage($request->email)]);
             }
 
-            if (str_ends_with($request->email, '@region.foodguard.com') && $role !== 'daerah') {
-                Auth::logout();
-                return back()->withErrors(['email' => 'Email ini hanya untuk admin daerah.']);
-            }
-
-            if (str_ends_with($request->email, '@public.foodguard.com') && $role !== 'user') {
-                Auth::logout();
-                return back()->withErrors(['email' => 'Email ini hanya untuk pengguna umum.']);
-            }
-
-            // Redirect berdasarkan role
-            switch ($role) {
+            switch ($user->role) {
                 case 'nasional':
                     return redirect()->intended('/nasional/dashboard');
                 case 'daerah':
@@ -72,11 +53,9 @@ class AuthController extends Controller
             }
         }
 
-        // Jika autentikasi gagal
         return back()->withErrors(['email' => 'Email atau password salah.']);
     }
 
-    // Proses register
     public function register(Request $request)
     {
         $request->validate([
@@ -84,38 +63,64 @@ class AuthController extends Controller
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:6|confirmed',
             'role' => 'required|in:nasional,daerah,user',
-            'Id_region' => 'required_if:role,daerah|nullable|exists:lokasi,Id_lokasi',
+            'id_region' => 'required_if:role,daerah|nullable|exists:wilayah,id',
         ]);
 
-        // Validasi domain email berdasarkan role
-        if ($request->role === 'nasional' && !str_ends_with($request->email, '@foodguard.com')) {
-            return back()->withErrors(['email' => 'Email untuk admin nasional harus menggunakan domain @foodguard.com.']);
-        }
-        if ($request->role === 'daerah' && !str_ends_with($request->email, '@region.foodguard.com')) {
-            return back()->withErrors(['email' => 'Email untuk admin daerah harus menggunakan domain @region.foodguard.com.']);
-        }
-        if ($request->role === 'user' && !str_ends_with($request->email, '@public.foodguard.com')) {
-            return back()->withErrors(['email' => 'Email untuk pengguna umum harus menggunakan domain @public.foodguard.com.']);
+        if (!$this->validateEmailDomain($request->email, $request->role)) {
+            return back()->withErrors(['email' => $this->getEmailErrorMessage($request->email, $request->role)]);
         }
 
         User::create([
             'name' => $request->name,
             'email' => $request->email,
-            'password' => bcrypt($request->password),
+            'password' => Hash::make($request->password),
             'role' => $request->role,
-            'Id_region' => $request->role === 'daerah' ? $request->Id_region : null,
+            'id_region' => $request->role === 'daerah' ? $request->id_region : null,
             'created_at' => now(),
         ]);
 
         return redirect()->route('login')->with('success', 'Registrasi berhasil. Silakan login.');
     }
 
-    // Proses logout
     public function logout(Request $request)
     {
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
         return redirect('/login');
+    }
+
+    private function validateEmailDomain($email, $role)
+    {
+        return match ($role) {
+            'nasional' => str_ends_with($email, '@foodguard.com'),
+            'daerah' => str_ends_with($email, '@region.foodguard.com'),
+            'user' => str_ends_with($email, '@public.foodguard.com'),
+            default => false,
+        };
+    }
+
+    private function getEmailErrorMessage($email, $role = null)
+    {
+        if ($role) {
+            return match ($role) {
+                'nasional' => 'Email untuk admin nasional harus menggunakan domain @foodguard.com.',
+                'daerah' => 'Email untuk admin daerah harus menggunakan domain @region.foodguard.com.',
+                'user' => 'Email untuk pengguna umum harus menggunakan domain @public.foodguard.com.',
+                default => 'Domain email tidak valid untuk role yang dipilih.',
+            };
+        }
+
+        if (str_ends_with($email, '@foodguard.com')) {
+            return 'Email ini hanya untuk admin nasional.';
+        }
+        if (str_ends_with($email, '@region.foodguard.com')) {
+            return 'Email ini hanya untuk admin daerah.';
+        }
+        if (str_ends_with($email, '@public.foodguard.com')) {
+            return 'Email ini hanya untuk pengguna umum.';
+        }
+
+        return 'Domain email tidak valid.';
     }
 }

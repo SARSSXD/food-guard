@@ -2,16 +2,12 @@
 <html lang="en">
 
 <head>
-    <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>Register - Food-Guard</title>
-    <!-- base:css -->
     <link rel="stylesheet" href="{{ asset('assets/vendors/mdi/css/materialdesignicons.min.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/vendors/css/vendor.bundle.base.css') }}">
-    <!-- inject:css -->
     <link rel="stylesheet" href="{{ asset('assets/css/style.css') }}">
-    <!-- custom:css -->
     <style>
         .form-check-input {
             display: inline-block !important;
@@ -29,7 +25,6 @@
             cursor: pointer;
         }
     </style>
-    <!-- endinject -->
     <link rel="shortcut icon" href="{{ asset('assets/images/favicon.png') }}" />
 </head>
 
@@ -111,8 +106,10 @@
                                 <div class="form-group">
                                     <label for="role">Role</label>
                                     <select class="form-control form-control-lg" id="role" name="role" required>
-                                        <option value="" disabled selected>-- Pilih Peran --</option>
-                                        <option value="nasional" {{ old('role') == 'nasional' ? 'selected' : '' }}>Admin
+                                        <option value="" disabled {{ old('role') == '' ? 'selected' : '' }}>--
+                                            Pilih Peran --</option>
+                                        <option value="nasional" {{ old('role') == 'nasional' ? 'selected' : '' }}>
+                                            Admin
                                             Nasional</option>
                                         <option value="daerah" {{ old('role') == 'daerah' ? 'selected' : '' }}>Admin
                                             Daerah</option>
@@ -120,14 +117,17 @@
                                             Umum</option>
                                     </select>
                                 </div>
-                                <div class="form-group" id="region-group" style="display: none;">
-                                    <label for="Id_region">Region</label>
-                                    <select class="form-control form-control-lg" id="Id_region" name="Id_region">
-                                        <option value="" disabled selected>-- Pilih Region --</option>
-                                        @foreach (\App\Models\Lokasi::all() as $lokasi)
-                                            <option value="{{ $lokasi->Id_lokasi }}"
-                                                {{ old('Id_region') == $lokasi->Id_lokasi ? 'selected' : '' }}>
-                                                {{ $lokasi->name }}
+                                <div class="form-group" id="region-group"
+                                    style="display: {{ old('role') == 'daerah' ? 'block' : 'none' }};">
+                                    <label for="id_region">Region</label>
+                                    <select class="form-control form-control-lg" id="id_region" name="id_region"
+                                        {{ old('role') == 'daerah' ? 'required' : '' }}>
+                                        <option value="" disabled {{ old('id_region') == '' ? 'selected' : '' }}>
+                                            -- Pilih Region --</option>
+                                        @foreach ($wilayah as $region)
+                                            <option value="{{ $region->id }}"
+                                                {{ old('id_region') == $region->id ? 'selected' : '' }}>
+                                                {{ $region->provinsi }} - {{ $region->kota }}
                                             </option>
                                         @endforeach
                                     </select>
@@ -159,26 +159,31 @@
             </div>
         </div>
     </div>
-    <!-- base:js -->
     <script src="{{ asset('assets/vendors/js/vendor.bundle.base.js') }}"></script>
-    <!-- inject:js -->
     <script src="{{ asset('assets/js/off-canvas.js') }}"></script>
     <script src="{{ asset('assets/js/hoverable-collapse.js') }}"></script>
     <script src="{{ asset('assets/js/template.js') }}"></script>
-    <!-- custom:js -->
     <script>
-        document.getElementById('role').addEventListener('change', function() {
-            var regionGroup = document.getElementById('region-group');
-            if (this.value === 'daerah') {
-                regionGroup.style.display = 'block';
-                document.getElementById('Id_region').required = true;
-            } else {
-                regionGroup.style.display = 'none';
-                document.getElementById('Id_region').required = false;
+        document.addEventListener('DOMContentLoaded', function() {
+            const roleSelect = document.getElementById('role');
+            const regionGroup = document.getElementById('region-group');
+            const regionSelect = document.getElementById('id_region');
+
+            function toggleRegionField() {
+                if (roleSelect.value === 'daerah') {
+                    regionGroup.style.display = 'block';
+                    regionSelect.required = true;
+                } else {
+                    regionGroup.style.display = 'none';
+                    regionSelect.required = false;
+                }
             }
+
+            toggleRegionField();
+
+            roleSelect.addEventListener('change', toggleRegionField);
         });
     </script>
-    <!-- endinject -->
 </body>
 
 </html>

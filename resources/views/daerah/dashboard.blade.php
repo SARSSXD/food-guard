@@ -5,68 +5,138 @@
         <div class="col-lg-12 grid-margin stretch-card">
             <div class="card">
                 <div class="card-body">
-                    <h4 class="card-title">Data Produksi Pangan Terbaru</h4>
-                    <div class="table-responsive">
-                        <table class="table table-striped">
-                            <thead>
-                                <tr>
-                                    <th>Komoditas</th>
-                                    <th>Volume (Ton)</th>
-                                    <th>Lokasi</th>
-                                    <th>Waktu</th>
-                                    <th>Status Validasi</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach ($produksiPangan as $data)
-                                    <tr>
-                                        <td>{{ $data->komoditas }}</td>
-                                        <td>{{ $data->volume }}</td>
-                                        <td>{{ $data->lokasi->name }}</td>
-                                        <td>{{ \Carbon\Carbon::parse($data->waktu)->format('d M Y') }}</td>
-                                        <td>{{ $data->status_valid }}</td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
+                    <h4 class="card-title">Dashboard Admin Daerah</h4>
+                    <p class="card-description">Ringkasan data pangan untuk wilayah {{ $wilayah->provinsi }} -
+                        {{ $wilayah->kota }}</p>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="card card-stats bg-primary text-white">
+                                <div class="card-body">
+                                    <h6 class="card-title">Produksi Pangan</h6>
+                                    <h3 class="card-text">{{ $totalProduksi }} Ton</h3>
+                                    <p class="card-text">Total produksi terverifikasi</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card card-stats bg-success text-white">
+                                <div class="card-body">
+                                    <h6 class="card-title">Cadangan Pangan</h6>
+                                    <h3 class="card-text">{{ $totalCadangan }} Ton</h3>
+                                    <p class="card-text">Total stok gudang</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card card-stats bg-info text-white">
+                                <div class="card-body">
+                                    <h6 class="card-title">Distribusi Pangan</h6>
+                                    <h3 class="card-text">{{ $totalDistribusi }} Pengiriman</h3>
+                                    <p class="card-text">Total pengiriman selesai</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card card-stats bg-warning text-white">
+                                <div class="card-body">
+                                    <h6 class="card-title">Artikel Gizi</h6>
+                                    <h3 class="card-text">{{ $totalArtikel }}</h3>
+                                    <p class="card-text">Total artikel diterbitkan</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mt-4">
+                        <div class="col-lg-6">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">Produksi vs Cadangan Pangan</h5>
+                                    <canvas id="produksiCadanganChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">Tren Harga Pangan</h5>
+                                    <canvas id="hargaPanganChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-lg-12 grid-margin stretch-card">
-            <div class="card">
-                <div class="card-body">
-                    <h4 class="card-title">Input Data Produksi Pangan</h4>
-                    <form method="POST" action="{{ url('daerah/produksi/store') }}">
-                        @csrf
-                        <div class="form-group">
-                            <label for="komoditas">Komoditas</label>
-                            <select class="form-control" id="komoditas" name="komoditas" required>
-                                <option value="Beras">Beras</option>
-                                <option value="Jagung">Jagung</option>
-                                <option value="Kedelai">Kedelai</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="volume">Volume (Ton)</label>
-                            <input type="number" class="form-control" id="volume" name="volume" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="lokasi">Lokasi</label>
-                            <select class="form-control" id="lokasi" name="Id_lokasi" required>
-                                @foreach ($lokasi as $l)
-                                    <option value="{{ $l->Id_lokasi }}">{{ $l->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="waktu">Waktu</label>
-                            <input type="date" class="form-control" id="waktu" name="waktu" required>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Simpan</button>
-                    </form>
-                </div>
-            </div>
-        </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const produksiCadanganChart = new Chart(document.getElementById('produksiCadanganChart'), {
+                type: 'bar',
+                data: {
+                    labels: @json($komoditasLabels),
+                    datasets: [{
+                        label: 'Produksi (Ton)',
+                        data: @json($produksiData),
+                        backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }, {
+                        label: 'Cadangan (Ton)',
+                        data: @json($cadanganData),
+                        backgroundColor: 'rgba(75, 192, 192, 0.5)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Jumlah (Ton)'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top'
+                        }
+                    }
+                }
+            });
+
+            const hargaPanganChart = new Chart(document.getElementById('hargaPanganChart'), {
+                type: 'line',
+                data: {
+                    labels: @json($hargaLabels),
+                    datasets: @json($hargaDatasets)
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Harga per Kg (Rp)'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Bulan-Tahun'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top'
+                        }
+                    }
+                }
+            });
+        });
+    </script>
 @endsection

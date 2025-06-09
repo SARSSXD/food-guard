@@ -1,8 +1,12 @@
 <?php
 
 namespace App\Http\Controllers;
-
 use App\Models\ProduksiPangan;
+use App\Models\CadanganPangan;
+use App\Models\DistribusiPangan;
+use App\Models\HargaPangan;
+use App\Models\ArtikelGizi;
+use Illuminate\Support\Facades\DB;
 use App\Models\Wilayah;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
@@ -63,15 +67,76 @@ class DashboardController extends Controller
 
     public function daerah()
     {
-        $wilayah = Wilayah::all();
-        $produksiPangan = ProduksiPangan::with('wilayah')
-            ->whereHas('wilayah', function ($query) {
-                $query->where('id_lokasi', Auth::user()->Id_region);
-            })
-            ->latest()
-            ->take(5)
+        $user = Auth::user();
+        $wilayah = Wilayah::findOrFail($user->id_region);
+
+        $totalProduksi = ProduksiPangan::where('id_lokasi', $user->id_region)
+            ->where('status_valid', 'terverifikasi')
+            ->sum('jumlah');
+        $totalCadangan = CadanganPangan::where('id_lokasi', $user->id_region)
+            ->sum('jumlah');
+        $totalDistribusi = DistribusiPangan::where('created_by', $user->id)
+            ->where('status', 'selesai')
+            ->count();
+        $totalArtikel = ArtikelGizi::where('id_penulis', $user->id)
+            ->count();
+
+        $produksiData = ProduksiPangan::select('komoditas', DB::raw('SUM(jumlah) as total'))
+            ->where('id_lokasi', $user->id_region)
+            ->groupBy('komoditas')
             ->get();
-        return view('daerah.dashboard', compact('wilayah', 'produksiPangan'));
+        $cadanganData = CadanganPangan::select('komoditas', DB::raw('SUM(jumlah) as total'))
+            ->where('id_lokasi', $user->id_region)
+            ->groupBy('komoditas')
+            ->get();
+
+        $komoditasLabels = array_unique(array_merge(
+            $produksiData->pluck('komoditas')->toArray(),
+            $cadanganData->pluck('komoditas')->toArray()
+        ));
+        $produksiValues = [];
+        $cadanganValues = [];
+        foreach ($komoditasLabels as $komoditas) {
+            $produksiValues[] = $produksiData->where('komoditas', $komoditas)->first()->total ?? 0;
+            $cadanganValues[] = $cadanganData->where('komoditas', $komoditas)->first()->total ?? 0;
+        }
+
+        $hargaData = HargaPangan::select('komoditas', DB::raw('DATE_FORMAT(tanggal, "%Y-%m") as bulan_tahun'), DB::raw('AVG(harga_per_kg) as avg_harga'))
+            ->where('id_lokasi', $user->id_region)
+            ->groupBy('komoditas', 'bulan_tahun')
+            ->orderBy('bulan_tahun')
+            ->get();
+
+        $hargaLabels = $hargaData->pluck('bulan_tahun')->unique()->values()->toArray();
+        $komoditasHarga = $hargaData->pluck('komoditas')->unique()->toArray();
+        $hargaDatasets = [];
+        $colors = ['rgba(255, 99, 132, 0.5)', 'rgba(54, 162, 235, 0.5)', 'rgba(255, 206, 86, 0.5)', 'rgba(75, 192, 192, 0.5)'];
+        foreach ($komoditasHarga as $index => $komoditas) {
+            $data = [];
+            foreach ($hargaLabels as $bulan) {
+                $data[] = $hargaData->where('komoditas', $komoditas)->where('bulan_tahun', $bulan)->first()->avg_harga ?? 0;
+            }
+            $hargaDatasets[] = [
+                'label' => $komoditas,
+                'data' => $data,
+                'backgroundColor' => $colors[$index % count($colors)],
+                'borderColor' => str_replace('0.5', '1', $colors[$index % count($colors)]),
+                'borderWidth' => 1,
+            ];
+        }
+
+        return view('daerah.dashboard', [
+            'wilayah' => $wilayah,
+            'totalProduksi' => $totalProduksi,
+            'totalCadangan' => $totalCadangan,
+            'totalDistribusi' => $totalDistribusi,
+            'totalArtikel' => $totalArtikel,
+            'komoditasLabels' => $komoditasLabels,
+            'produksiData' => $produksiValues,
+            'cadanganData' => $cadanganValues,
+            'hargaLabels' => $hargaLabels,
+            'hargaDatasets' => $hargaDatasets,
+        ]);
     }
 
     private function getColor($komoditas)
