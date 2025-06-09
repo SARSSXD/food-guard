@@ -1,37 +1,68 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title>User Umum - Food-Guard</title>
-    <link rel="stylesheet" href="{{ asset('assets/css/vendor.bundle.base.css') }}">
-    <link rel="stylesheet" href="{{ asset('assets/css/style.css') }}">
-    <link rel="stylesheet" href="{{ asset('assets/css/custom.css') }}">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@7.4.47/css/materialdesignicons.min.css">
-    <link rel="shortcut icon" href="{{ asset('assets/images/favicon.png') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ketahanan Pangan</title>
+
+    <!-- Favicon -->
+    <link href="{{ asset('/assetslp/img/logo1.png') }}" rel="icon">
+    <link href="{{ asset('/assetslp/img/apple-touch-icon.png') }}" rel="apple-touch-icon">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700&family=Marcellus&display=swap"
+        rel="stylesheet">
+
+    <!-- Vendor CSS -->
+    <link href="{{ asset('/assetslp/vendor/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
+    <link href="{{ asset('/assetslp/vendor/bootstrap-icons/bootstrap-icons.css') }}" rel="stylesheet">
+    <link href="{{ asset('/assetslp/vendor/aos/aos.css') }}" rel="stylesheet">
+    <link href="{{ asset('/assetslp/vendor/swiper/swiper-bundle.min.css') }}" rel="stylesheet">
+    <link href="{{ asset('/assetslp/vendor/glightbox/css/glightbox.min.css') }}" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+        crossorigin="anonymous">
+
+    <!-- Main CSS -->
+    <link href="{{ asset('/assetslp/css/main.css') }}" rel="stylesheet">
+
+    <!-- AOS CSS -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
 </head>
 
-<body>
-    <div class="container-scroller d-flex">
-        @include('user.layouts.partials.sidebar')
-        <div class="container-fluid page-body-wrapper">
-            @include('user.layouts.partials.navbar')
-            <div class="main-panel">
-                <div class="content-wrapper">
-                    @yield('content')
-                </div>
-                @include('user.layouts.partials.footer')
-            </div>
-        </div>
-    </div>
-    <script src="{{ asset('assets/js/vendor.bundle.base.js') }}"></script>
-    <script src="{{ asset('assets/js/chart.js/Chart.min.js') }}"></script>
-    <script src="{{ asset('assets/js/off-canvas.js') }}"></script>
-    <script src="{{ asset('assets/js/hoverable-collapse.js') }}</script>
-        <script src=" {{ asset('assets/js/template.js') }}"></script>
-    <script src="{{ asset('assets/js/dashboard.js') }}"></script>
-    <script src="{{ asset('assets/js/navbar-scroll.js') }}"></script>
+<body class="index-page">
+    @include('user.layouts.partials.navbar')
+
+    <main class="main">
+        @yield('content')
+    </main>
+
+    @include('user.layouts.partials.footer')
+
+    <!-- Scroll Top -->
+    <a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i
+            class="bi bi-arrow-up-short"></i></a>
+
+    <!-- Preloader -->
+    <div id="preloader"></div>
+
+    <!-- Vendor JS Files -->
+    <script src="{{ asset('/assetslp/vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
+    <script src="{{ asset('/assetslp/vendor/php-email-form/validate.js') }}"></script>
+    <script src="{{ asset('/assetslp/vendor/aos/aos.js') }}"></script>
+    <script src="{{ asset('/assetslp/vendor/swiper/swiper-bundle.min.js') }}"></script>
+    <script src="{{ asset('/assetslp/vendor/glightbox/js/glightbox.min.js') }}"></script>
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+
+    <!-- Main JS File -->
+    <script src="{{ asset('/assetslp/js/main.js') }}"></script>
+
+    <!-- AOS Initialization -->
+    <script>
+        AOS.init();
+    </script>
 </body>
 
 </html>

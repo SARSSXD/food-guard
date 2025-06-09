@@ -11,66 +11,44 @@
             </a>
         </li>
         <li class="nav-item sidebar-category">
-            <p>Data Pangan</p>
+            <p>Manajemen</p>
             <span></span>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="{{ url('nasional/produksi') }}">
+            <a class="nav-link" href="{{ route('nasional.produksi.index') }}">
                 <i class="mdi mdi-sprout menu-icon"></i>
                 <span class="menu-title">Produksi Pangan</span>
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="{{ url('nasional/cadangan') }}">
+            <a class="nav-link" href="{{ route('nasional.cadangan.index') }}">
                 <i class="mdi mdi-warehouse menu-icon"></i>
                 <span class="menu-title">Cadangan Pangan</span>
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="{{ url('nasional/harga') }}">
+            <a class="nav-link" href="{{ route('nasional.harga.index') }}">
                 <i class="mdi mdi-currency-usd menu-icon"></i>
                 <span class="menu-title">Harga Pangan</span>
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="{{ url('nasional/distribusi') }}">
+            <a class="nav-link" href="{{ route('nasional.distribusi.index') }}">
                 <i class="mdi mdi-truck menu-icon"></i>
                 <span class="menu-title">Distribusi Pangan</span>
             </a>
         </li>
-        <li class="nav-item sidebar-category">
-            <p>Manajemen</p>
-            <span></span>
-        </li>
         <li class="nav-item">
-            <a class="nav-link" href="{{ url('nasional/bantuan') }}">
-                <i class="mdi mdi-hand-okay menu-icon"></i>
-                <span class="menu-title">Bantuan/Subsidi</span>
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" href="{{ url('nasional/edukasi') }}">
-                <i class="mdi mdi-book-open-page-variant menu-icon"></i>
-                <span class="menu-title">Edukasi Gizi</span>
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" href="{{ url('nasional/early-warning') }}">
-                <i class="mdi mdi-alert menu-icon"></i>
-                <span class="menu-title">Peringatan Dini</span>
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" href="{{ url('nasional/prediksi') }}">
+            <a class="nav-link" href="{{ route('nasional.prediksi.index') }}">
                 <i class="mdi mdi-chart-line menu-icon"></i>
-                <span class="menu-title">Prediksi Produksi</span>
+                <span class="menu-title">Prediksi & Stok</span>
             </a>
         </li>
-        <li class="nav-item">
-            <a class="nav-link" href="{{ url('nasional/laporan') }}">
-                <i class="mdi mdi-message-text menu-icon"></i>
-                <span class="menu-title">Laporan Masyarakat</span>
+        {{-- <li class="nav-item">
+            <a class="nav-link" href="{{ route('nasional.artikel.index') }}">
+                <i class="mdi mdi-book-open-page-variant menu-icon"></i>
+                <span class="menu-title">Artikel Gizi</span>
             </a>
-        </li>
+        </li> --}}
     </ul>
 </nav>

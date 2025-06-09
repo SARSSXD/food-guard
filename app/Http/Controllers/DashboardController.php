@@ -1,11 +1,13 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use App\Models\ProduksiPangan;
 use App\Models\CadanganPangan;
 use App\Models\DistribusiPangan;
 use App\Models\HargaPangan;
 use App\Models\ArtikelGizi;
+use App\Models\PrediksiPangan;
 use Illuminate\Support\Facades\DB;
 use App\Models\Wilayah;
 use Illuminate\Support\Facades\Auth;
@@ -16,37 +18,82 @@ class DashboardController extends Controller
 {
     public function nasional()
     {
-        $produksiPangan = ProduksiPangan::with('region', 'creator')->orderBy('waktu', 'desc')->get();
+        // Data Produksi Pangan
+        $produksiPangan = ProduksiPangan::with(['region', 'creator'])
+            ->where('status_valid', 'terverifikasi')
+            ->orderBy('created_at', 'desc')
+            ->get();
 
-        // Data untuk grafik
-        $grafikData = ProduksiPangan::selectRaw('komoditas, MONTH(waktu) as bulan, SUM(volume) as total_volume')
-            ->whereYear('waktu', '<=', 2025) // Batasi hingga tahun 2025
+        // Data Cadangan Pangan
+        $cadanganPangan = CadanganPangan::with('region')
+            ->where('status_valid', 'terverifikasi')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        // Data Harga Pangan
+        $hargaPangan = HargaPangan::with(['region', 'creator'])
+            ->orderBy('tanggal', 'desc')
+            ->get();
+
+        // Data Distribusi Pangan
+        $distribusiPangan = DistribusiPangan::with(['region', 'creator'])
+            ->orderBy('tanggal_kirim', 'desc')
+            ->get();
+
+        // Data Prediksi Pangan
+        $prediksiPangan = PrediksiPangan::with(['region', 'creator'])
+            ->where('status', 'disetujui')
+            ->orderBy('bulan_tahun', 'desc')
+            ->get();
+
+        // Data Artikel Gizi
+        $artikelGizi = ArtikelGizi::with('author')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        // Grafik Produksi Pangan (Total Jumlah per Komoditas per Bulan)
+        $grafikProduksi = ProduksiPangan::selectRaw('komoditas, DATE_FORMAT(created_at, "%Y-%m") as bulan, SUM(jumlah) as total_jumlah')
+            ->whereYear('created_at', '<=', 2025)
+            ->where('status_valid', 'terverifikasi')
             ->groupBy('komoditas', 'bulan')
             ->orderBy('bulan')
             ->get();
 
-        Log::info('Grafik Data:', $grafikData->toArray());
-        Log::info('Produksi Pangan Count:', ['count' => $produksiPangan->count()]);
+        // Grafik Cadangan Pangan (Total Jumlah per Komoditas)
+        $grafikCadangan = CadanganPangan::selectRaw('komoditas, SUM(jumlah) as total_jumlah')
+            ->where('status_valid', 'terverifikasi')
+            ->groupBy('komoditas')
+            ->get();
 
-        $labels = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
-        $datasets = [];
-        $komoditasList = $grafikData->pluck('komoditas')->unique();
+        // Grafik Harga Pangan (Rata-rata Harga per Komoditas per Bulan)
+        $grafikHarga = HargaPangan::selectRaw('komoditas, DATE_FORMAT(tanggal, "%Y-%m") as bulan, AVG(harga_per_kg) as avg_harga')
+            ->groupBy('komoditas', 'bulan')
+            ->orderBy('bulan')
+            ->get();
+
+        // Persiapan data untuk grafik
+        $labels = $grafikProduksi->pluck('bulan')->unique()->sort()->values()->toArray();
+        $komoditasList = $grafikProduksi->pluck('komoditas')->unique();
+        $produksiDatasets = [];
 
         if ($komoditasList->isEmpty()) {
-            Log::warning('No komoditas found for chart.');
-            $datasets[] = [
+            Log::warning('No komoditas found for produksi chart.');
+            $produksiDatasets[] = [
                 'label' => 'Tidak ada data',
-                'data' => array_fill(0, 12, 0),
+                'data' => array_fill(0, count($labels), 0),
                 'borderColor' => '#999999',
                 'fill' => false
             ];
         } else {
             foreach ($komoditasList as $komoditas) {
-                $data = array_fill(0, 12, 0);
-                foreach ($grafikData->where('komoditas', $komoditas) as $item) {
-                    $data[$item->bulan - 1] = floatval($item->total_volume); // Pastikan float
+                $data = array_fill(0, count($labels), 0);
+                foreach ($grafikProduksi->where('komoditas', $komoditas) as $item) {
+                    $index = array_search($item->bulan, $labels);
+                    if ($index !== false) {
+                        $data[$index] = floatval($item->total_jumlah);
+                    }
                 }
-                $datasets[] = [
+                $produksiDatasets[] = [
                     'label' => $komoditas,
                     'data' => $data,
                     'borderColor' => $this->getColor($komoditas),
@@ -55,14 +102,57 @@ class DashboardController extends Controller
             }
         }
 
+        // Grafik Cadangan
+        $cadanganLabels = $grafikCadangan->pluck('komoditas')->toArray();
+        $cadanganValues = $grafikCadangan->pluck('total_jumlah')->map(fn($value) => floatval($value))->toArray();
+
+        // Grafik Harga
+        $hargaLabels = $grafikHarga->pluck('bulan')->unique()->sort()->values()->toArray();
+        $komoditasHarga = $grafikHarga->pluck('komoditas')->unique()->toArray();
+        $hargaDatasets = [];
+        $colors = ['rgba(255, 99, 132, 0.5)', 'rgba(54, 162, 235, 0.5)', 'rgba(255, 206, 86, 0.5)', 'rgba(75, 192, 192, 0.5)'];
+        foreach ($komoditasHarga as $index => $komoditas) {
+            $data = array_fill(0, count($hargaLabels), 0);
+            foreach ($grafikHarga->where('komoditas', $komoditas) as $item) {
+                $index = array_search($item->bulan, $hargaLabels);
+                if ($index !== false) {
+                    $data[$index] = floatval($item->avg_harga);
+                }
+            }
+            $hargaDatasets[] = [
+                'label' => $komoditas,
+                'data' => $data,
+                'backgroundColor' => $colors[$index % count($colors)],
+                'borderColor' => str_replace('0.5', '1', $colors[$index % count($colors)]),
+                'borderWidth' => 1,
+            ];
+        }
+
         // Notifikasi data pending lebih dari 3 hari
         $pendingCount = ProduksiPangan::where('status_valid', 'pending')
-            ->where('waktu', '<', Carbon::now()->subDays(3))
+            ->where('created_at', '<', Carbon::now()->subDays(3))
             ->count();
 
         Log::info('Pending Count:', ['count' => $pendingCount]);
+        Log::info('Produksi Datasets:', $produksiDatasets);
+        Log::info('Cadangan Labels:', $cadanganLabels);
+        Log::info('Harga Datasets:', $hargaDatasets);
 
-        return view('nasional.dashboard', compact('produksiPangan', 'labels', 'datasets', 'pendingCount'));
+        return view('nasional.dashboard', compact(
+            'produksiPangan',
+            'cadanganPangan',
+            'hargaPangan',
+            'distribusiPangan',
+            'prediksiPangan',
+            'artikelGizi',
+            'labels',
+            'produksiDatasets',
+            'cadanganLabels',
+            'cadanganValues',
+            'hargaLabels',
+            'hargaDatasets',
+            'pendingCount'
+        ));
     }
 
     public function daerah()
