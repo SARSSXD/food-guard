@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use App\Models\ProduksiPangan;
 use App\Models\CadanganPangan;
 use App\Models\DistribusiPangan;
@@ -69,11 +70,15 @@ class DashboardController extends Controller
     {
         $user = Auth::user();
         $wilayah = Wilayah::findOrFail($user->id_region);
+        $currentYear = date('Y');
 
+        // Statistik
         $totalProduksi = ProduksiPangan::where('id_lokasi', $user->id_region)
             ->where('status_valid', 'terverifikasi')
+            ->where('periode', $currentYear)
             ->sum('jumlah');
         $totalCadangan = CadanganPangan::where('id_lokasi', $user->id_region)
+            ->where('periode', $currentYear)
             ->sum('jumlah');
         $totalDistribusi = DistribusiPangan::where('created_by', $user->id)
             ->where('status', 'selesai')
@@ -81,12 +86,15 @@ class DashboardController extends Controller
         $totalArtikel = ArtikelGizi::where('id_penulis', $user->id)
             ->count();
 
+        // Data untuk Grafik Produksi vs Cadangan
         $produksiData = ProduksiPangan::select('komoditas', DB::raw('SUM(jumlah) as total'))
             ->where('id_lokasi', $user->id_region)
+            ->where('periode', $currentYear)
             ->groupBy('komoditas')
             ->get();
         $cadanganData = CadanganPangan::select('komoditas', DB::raw('SUM(jumlah) as total'))
             ->where('id_lokasi', $user->id_region)
+            ->where('periode', $currentYear)
             ->groupBy('komoditas')
             ->get();
 
@@ -101,6 +109,7 @@ class DashboardController extends Controller
             $cadanganValues[] = $cadanganData->where('komoditas', $komoditas)->first()->total ?? 0;
         }
 
+        // Data untuk Grafik Harga Pangan
         $hargaData = HargaPangan::select('komoditas', DB::raw('DATE_FORMAT(tanggal, "%Y-%m") as bulan_tahun'), DB::raw('AVG(harga_per_kg) as avg_harga'))
             ->where('id_lokasi', $user->id_region)
             ->groupBy('komoditas', 'bulan_tahun')

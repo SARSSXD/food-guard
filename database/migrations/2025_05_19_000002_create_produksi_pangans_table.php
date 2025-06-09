@@ -12,6 +12,7 @@ return new class extends Migration
             $table->id('id');
             $table->string('komoditas');
             $table->float('jumlah');
+            $table->string('periode');
             $table->foreignId('id_lokasi')->constrained('wilayah', 'id')->onDelete('cascade');
             $table->enum('status_valid', ['terverifikasi', 'pending']);
             $table->foreignId('created_by')->constrained('users', 'id')->onDelete('cascade');

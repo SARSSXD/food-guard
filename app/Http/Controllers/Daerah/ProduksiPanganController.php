@@ -29,6 +29,7 @@ class ProduksiPanganController extends Controller
         $request->validate([
             'komoditas' => 'required|string|max:255',
             'jumlah' => 'required|numeric|min:0',
+            'periode' => 'required|digits:4|integer|min:1900|max:' . date('Y'),
             'id_lokasi' => 'required|exists:wilayah,id',
         ]);
 
@@ -39,6 +40,7 @@ class ProduksiPanganController extends Controller
         ProduksiPangan::create([
             'komoditas' => $request->komoditas,
             'jumlah' => $request->jumlah,
+            'periode' => $request->periode,
             'id_lokasi' => $request->id_lokasi,
             'status_valid' => 'pending',
             'created_by' => Auth::user()->id,
@@ -46,6 +48,7 @@ class ProduksiPanganController extends Controller
 
         return redirect()->route('daerah.produksi.index')->with('success', 'Data produksi pangan berhasil ditambahkan.');
     }
+
     public function update(Request $request, $id)
     {
         $produksiPangan = ProduksiPangan::findOrFail($id);
@@ -56,6 +59,7 @@ class ProduksiPanganController extends Controller
         $request->validate([
             'komoditas' => 'required|string|max:255',
             'jumlah' => 'required|numeric|min:0',
+            'periode' => 'required|digits:4|integer|min:1900|max:' . date('Y'),
             'id_lokasi' => 'required|exists:wilayah,id',
         ]);
 
@@ -66,6 +70,7 @@ class ProduksiPanganController extends Controller
         $produksiPangan->update([
             'komoditas' => $request->komoditas,
             'jumlah' => $request->jumlah,
+            'periode' => $request->periode,
             'id_lokasi' => $request->id_lokasi,
             'status_valid' => 'pending',
         ]);

@@ -29,6 +29,7 @@ class CadanganPanganController extends Controller
         $request->validate([
             'komoditas' => 'required|string|max:255',
             'jumlah' => 'required|numeric|min:0',
+            'periode' => 'required|digits:4|integer|min:1900|max:' . date('Y'),
             'id_lokasi' => 'required|exists:wilayah,id',
         ]);
 
@@ -39,6 +40,7 @@ class CadanganPanganController extends Controller
         CadanganPangan::create([
             'komoditas' => $request->komoditas,
             'jumlah' => $request->jumlah,
+            'periode' => $request->periode,
             'id_lokasi' => $request->id_lokasi,
             'status_valid' => 'pending',
         ]);
@@ -56,6 +58,7 @@ class CadanganPanganController extends Controller
         $request->validate([
             'komoditas' => 'required|string|max:255',
             'jumlah' => 'required|numeric|min:0',
+            'periode' => 'required|digits:4|integer|min:1900|max:' . date('Y'),
             'id_lokasi' => 'required|exists:wilayah,id',
         ]);
 
@@ -66,6 +69,7 @@ class CadanganPanganController extends Controller
         $cadanganPangan->update([
             'komoditas' => $request->komoditas,
             'jumlah' => $request->jumlah,
+            'periode' => $request->periode,
             'id_lokasi' => $request->id_lokasi,
             'status_valid' => 'pending',
         ]);
