@@ -16,6 +16,7 @@
                                 <tr>
                                     <th>Komoditas</th>
                                     <th>Jumlah (Ton)</th>
+                                    <th>Periode</th>
                                     <th>Lokasi</th>
                                     <th>Status</th>
                                     <th>Aksi</th>
@@ -25,7 +26,8 @@
                                 @forelse ($cadangan as $item)
                                     <tr>
                                         <td>{{ $item->komoditas }}</td>
-                                        <td>{{ $item->jumlah }}</td>
+                                        <td>{{ number_format($item->jumlah, 2) }}</td>
+                                        <td>{{ $item->periode }}</td>
                                         <td>{{ $item->region->provinsi }} - {{ $item->region->kota }}</td>
                                         <td>{{ $item->status_valid }}</td>
                                         <td>
@@ -47,7 +49,7 @@
                                     ])
                                 @empty
                                     <tr>
-                                        <td colspan="5" class="text-center">Tidak ada data cadangan pangan.</td>
+                                        <td colspan="6" class="text-center">Tidak ada data cadangan pangan.</td>
                                     </tr>
                                 @endforelse
                             </tbody>
