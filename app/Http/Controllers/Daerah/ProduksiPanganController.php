@@ -5,11 +5,19 @@ namespace App\Http\Controllers\Daerah;
 use App\Http\Controllers\Controller;
 use App\Models\ProduksiPangan;
 use App\Models\Wilayah;
+use App\Services\ProduksiPanganService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class ProduksiPanganController extends Controller
 {
+    protected $produksiService;
+
+    public function __construct(ProduksiPanganService $produksiService)
+    {
+        $this->produksiService = $produksiService;
+    }
+
     public function index(Request $request)
     {
         $query = ProduksiPangan::where('id_lokasi', Auth::user()->id_region)->with('region');
@@ -46,6 +54,9 @@ class ProduksiPanganController extends Controller
             'created_by' => Auth::user()->id,
         ]);
 
+        // Agregasi data per provinsi
+        $this->produksiService->aggregateData($request->periode, $request->komoditas, $request->id_lokasi);
+
         return redirect()->route('daerah.produksi.index')->with('success', 'Data produksi pangan berhasil ditambahkan.');
     }
 
@@ -75,6 +86,9 @@ class ProduksiPanganController extends Controller
             'status_valid' => 'pending',
         ]);
 
+        // Agregasi ulang data per provinsi
+        $this->produksiService->aggregateData($request->periode, $request->komoditas, $request->id_lokasi);
+
         return redirect()->route('daerah.produksi.index')->with('success', 'Data produksi pangan berhasil diperbarui.');
     }
 
@@ -86,7 +100,14 @@ class ProduksiPanganController extends Controller
             return redirect()->route('daerah.produksi.index')->withErrors(['error' => 'Anda tidak memiliki akses untuk menghapus data ini.']);
         }
 
+        $periode = $produksiPangan->periode;
+        $komoditas = $produksiPangan->komoditas;
+        $id_lokasi = $produksiPangan->id_lokasi;
+
         $produksiPangan->delete();
+
+        // Agregasi ulang setelah penghapusan
+        $this->produksiService->aggregateData($periode, $komoditas, $id_lokasi);
 
         return redirect()->route('daerah.produksi.index')->with('success', 'Data produksi pangan berhasil dihapus.');
     }

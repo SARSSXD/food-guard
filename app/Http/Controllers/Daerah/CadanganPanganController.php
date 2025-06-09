@@ -5,11 +5,19 @@ namespace App\Http\Controllers\Daerah;
 use App\Http\Controllers\Controller;
 use App\Models\CadanganPangan;
 use App\Models\Wilayah;
+use App\Services\CadanganPanganService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class CadanganPanganController extends Controller
 {
+    protected $cadanganService;
+
+    public function __construct(CadanganPanganService $cadanganService)
+    {
+        $this->cadanganService = $cadanganService;
+    }
+
     public function index(Request $request)
     {
         $query = CadanganPangan::where('id_lokasi', Auth::user()->id_region)->with('region');
@@ -45,6 +53,9 @@ class CadanganPanganController extends Controller
             'status_valid' => 'pending',
         ]);
 
+        // Agregasi data per provinsi
+        $this->cadanganService->aggregateData($request->periode, $request->komoditas, $request->id_lokasi);
+
         return redirect()->route('daerah.cadangan.index')->with('success', 'Data cadangan pangan berhasil ditambahkan.');
     }
 
@@ -74,6 +85,9 @@ class CadanganPanganController extends Controller
             'status_valid' => 'pending',
         ]);
 
+        // Agregasi ulang data per provinsi
+        $this->cadanganService->aggregateData($request->periode, $request->komoditas, $request->id_lokasi);
+
         return redirect()->route('daerah.cadangan.index')->with('success', 'Data cadangan pangan berhasil diperbarui.');
     }
 
@@ -85,7 +99,14 @@ class CadanganPanganController extends Controller
             return redirect()->route('daerah.cadangan.index')->withErrors(['error' => 'Anda tidak memiliki akses untuk menghapus data ini.']);
         }
 
+        $periode = $cadanganPangan->periode;
+        $komoditas = $cadanganPangan->komoditas;
+        $id_lokasi = $cadanganPangan->id_lokasi;
+
         $cadanganPangan->delete();
+
+        // Agregasi ulang setelah penghapusan
+        $this->cadanganService->aggregateData($periode, $komoditas, $id_lokasi);
 
         return redirect()->route('daerah.cadangan.index')->with('success', 'Data cadangan pangan berhasil dihapus.');
     }

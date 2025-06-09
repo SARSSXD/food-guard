@@ -32,16 +32,21 @@ Route::middleware(['auth', 'role:nasional'])->group(function () {
 
     // Produksi Pangan
     Route::get('/nasional/produksi', [NasionalProduksiPanganController::class, 'index'])->name('nasional.produksi.index');
-    // Route::get('/nasional/produksi/{id}', [NasionalProduksiPanganController::class, 'show'])->name('nasional.produksi.show');
-    // Route::patch('/nasional/produksi/validasi/{id}', [NasionalProduksiPanganController::class, 'validasi'])->name('nasional.produksi.validasi');
+    Route::get('/nasional/produksi/pending', [NasionalProduksiPanganController::class, 'pending'])->name('nasional.produksi.pending');
+    Route::get('/nasional/produksi/{produksiPangan}', [NasionalProduksiPanganController::class, 'show'])->name('nasional.produksi.show');
+    Route::patch('/nasional/produksi/validasi/{produksiPangan}', [NasionalProduksiPanganController::class, 'validasi'])->name('nasional.produksi.validasi');
+    Route::get('/nasional/produksi/export', [NasionalProduksiPanganController::class, 'export'])->name('nasional.produksi.export');
 
     // // Cadangan Pangan
-    Route::get('/nasional/cadangan', [NasionalCadanganPanganController::class, 'index'])->name('nasional.cadangan.index');
-    // Route::get('/nasional/cadangan/{id}', [NasionalCadanganPanganController::class, 'show'])->name('nasional.cadangan.show');
+    Route::get('cadangan', [NasionalCadanganPanganController::class, 'index'])->name('nasional.cadangan.index');
+    Route::get('cadangan/pending', [NasionalCadanganPanganController::class, 'pending'])->name('nasional.cadangan.pending');
+    Route::get('cadangan/{cadanganPangan}', [NasionalCadanganPanganController::class, 'show'])->name('nasional.cadangan.show');
+    Route::patch('cadangan/{cadanganPangan}/validasi', [NasionalCadanganPanganController::class, 'validasi'])->name('nasional.cadangan.validasi');
+    Route::get('cadangan/export', [NasionalCadanganPanganController::class, 'export'])->name('nasional.cadangan.export');
 
-    // // Harga Pangan
-    Route::get('/nasional/harga', [NasionalHargaPanganController::class, 'index'])->name('nasional.harga.index');
-    // Route::get('/nasional/harga/{id}', [NasionalHargaPanganController::class, 'show'])->name('nasional.harga.show');
+    // Harga Pangan
+    Route::get('harga', [NasionalHargaPanganController::class, 'index'])->name('nasional.harga.index');
+    Route::post('harga/kirim-pesan', [NasionalHargaPanganController::class, 'kirimPesan'])->name('nasional.harga.kirim-pesan');
 
     // // Distribusi Pangan
     Route::get('/nasional/distribusi', [NasionalDistribusiPanganController::class, 'index'])->name('nasional.distribusi.index');
@@ -68,7 +73,7 @@ Route::middleware(['auth', 'role:daerah'])->group(function () {
 
     // Produksi Pangan
     Route::get('/daerah/produksi', [ProduksiPanganController::class, 'index'])->name('daerah.produksi.index');
-    Route::get('/daerah/produksi', [ProduksiPanganController::class, 'create'])->name('daerah.produksi.create');
+    Route::get('/daerah/produksi/create', [ProduksiPanganController::class, 'create'])->name('daerah.produksi.create');
     Route::post('/daerah/produksi', [ProduksiPanganController::class, 'store'])->name('daerah.produksi.store');
     Route::get('/daerah/produksi/{produksiPangan}/edit', [ProduksiPanganController::class, 'edit'])->name('daerah.produksi.edit');
     Route::put('/daerah/produksi/{produksiPangan}', [ProduksiPanganController::class, 'update'])->name('daerah.produksi.update');
