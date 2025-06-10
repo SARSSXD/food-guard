@@ -28,7 +28,7 @@ Route::get('/', [HomeController::class, 'index'])->name('landingpage');
 
 // Rute Dashboard Nasional dengan Autentikasi
 Route::middleware(['auth', 'role:nasional'])->group(function () {
-    Route::get('/nasional/dashboard', [DashboardController::class, 'nasional'])->name('nasional.dashboard');
+    Route::get('dashboard', [DashboardController::class, 'nasional'])->name('nasional.dashboard');
 
     // Produksi Pangan
     Route::get('/nasional/produksi', [NasionalProduksiPanganController::class, 'index'])->name('nasional.produksi.index');
@@ -38,11 +38,11 @@ Route::middleware(['auth', 'role:nasional'])->group(function () {
     Route::get('/nasional/produksi/export', [NasionalProduksiPanganController::class, 'export'])->name('nasional.produksi.export');
 
     // // Cadangan Pangan
-    Route::get('cadangan', [NasionalCadanganPanganController::class, 'index'])->name('nasional.cadangan.index');
-    Route::get('cadangan/pending', [NasionalCadanganPanganController::class, 'pending'])->name('nasional.cadangan.pending');
-    Route::get('cadangan/{cadanganPangan}', [NasionalCadanganPanganController::class, 'show'])->name('nasional.cadangan.show');
-    Route::patch('cadangan/{cadanganPangan}/validasi', [NasionalCadanganPanganController::class, 'validasi'])->name('nasional.cadangan.validasi');
-    Route::get('cadangan/export', [NasionalCadanganPanganController::class, 'export'])->name('nasional.cadangan.export');
+    Route::get('/nasional/cadangan', [NasionalCadanganPanganController::class, 'index'])->name('nasional.cadangan.index');
+    Route::get('/nasional/cadangan/pending', [NasionalCadanganPanganController::class, 'pending'])->name('nasional.cadangan.pending');
+    Route::get('/nasional/cadangan/{cadanganPangan}', [NasionalCadanganPanganController::class, 'show'])->name('nasional.cadangan.show');
+    Route::patch('/nasional/cadangan/{cadanganPangan}/validasi', [NasionalCadanganPanganController::class, 'validasi'])->name('nasional.cadangan.validasi');
+    Route::get('/nasional/cadangan/export', [NasionalCadanganPanganController::class, 'export'])->name('nasional.cadangan.export');
 
     // Harga Pangan
     Route::get('harga', [NasionalHargaPanganController::class, 'index'])->name('nasional.harga.index');
@@ -52,11 +52,11 @@ Route::middleware(['auth', 'role:nasional'])->group(function () {
     Route::get('/nasional/distribusi', [NasionalDistribusiPanganController::class, 'index'])->name('nasional.distribusi.index');
     // Route::get('/nasional/distribusi/{id}', [NasionalDistribusiPanganController::class, 'show'])->name('nasional.distribusi.show');
 
-    // // Prediksi & Stok
+    // Prediksi Pangan
     Route::get('/nasional/prediksi', [NasionalPrediksiPanganController::class, 'index'])->name('nasional.prediksi.index');
-    // Route::get('/nasional/prediksi/{id}', [NasionalPrediksiPanganController::class, 'show'])->name('nasional.prediksi.show');
-    // Route::patch('/nasional/prediksi/approve/{id}', [NasionalPrediksiPanganController::class, 'approve'])->name('nasional.prediksi.approve');
-    // Route::patch('/nasional/prediksi/reject/{id}', [NasionalPrediksiPanganController::class, 'reject'])->name('nasional.prediksi.reject');
+    Route::post('/nasional/prediksi', [NasionalPrediksiPanganController::class, 'store'])->name('nasional.prediksi.store');
+    Route::patch('/nasional/prediksi/{prediksiPangan}', [NasionalPrediksiPanganController::class, 'update'])->name('nasional.prediksi.update');
+    Route::post('/nasional/prediksi/kirim-pesan', [NasionalPrediksiPanganController::class, 'kirimPesan'])->name('nasional.prediksi.kirim-pesan');
 
     // // Artikel Gizi
     // Route::get('/nasional/artikel', [NasionalArtikelGiziController::class, 'index'])->name('nasional.artikel.index');

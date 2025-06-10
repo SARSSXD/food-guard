@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Daerah;
 
 use App\Http\Controllers\Controller;
+use App\Models\PesanPrediksiPangan;
 use App\Models\PrediksiPangan;
 use App\Models\Wilayah;
 use Illuminate\Http\Request;
@@ -12,18 +13,25 @@ class PrediksiPanganController extends Controller
 {
     public function index(Request $request)
     {
+        // Ambil prediksi untuk wilayah pengguna
         $query = PrediksiPangan::where('id_lokasi', Auth::user()->id_region)->with('region');
 
         if ($search = $request->query('search')) {
             $query->where('komoditas', 'LIKE', "%{$search}%")
-            ->orwhere('jenis', 'LIKE', "%{$search}%")
-            ->orWhere('metode', 'LIKE', "%{$search}%");
+                ->orWhere('jenis', 'LIKE', "%{$search}%")
+                ->orWhere('metode', 'LIKE', "%{$search}%");
         }
 
-        $prediksi = $query->get();
-        $wilayah = Wilayah::find(Auth::user()->id_region);
+        $prediksi = $query->orderBy('bulan_tahun', 'desc')->get();
+        $wilayah = Wilayah::findOrFail(Auth::user()->id_region);
 
-        return view('daerah.prediksi.index', compact('prediksi', 'wilayah'));
+        // Ambil pesan dari nasional untuk wilayah ini
+        $pesan = PesanPrediksiPangan::where('provinsi', $wilayah->provinsi)
+            ->with('creator')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return view('daerah.prediksi.index', compact('prediksi', 'wilayah', 'pesan'));
     }
 
     public function update(Request $request, $id)

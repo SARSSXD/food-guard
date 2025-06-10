@@ -1,14 +1,25 @@
 @extends('nasional.layouts.app')
 
 @section('content')
-<div class="row">
+<div class="row mb-4">
     <div class="col-lg-12 grid-margin stretch-card">
         <div class="card">
             <div class="card-body">
                 <h4 class="card-title">Dashboard Nasional</h4>
-                @if($pendingCount > 0)
+                <form method="GET" action="{{ route('nasional.dashboard') }}" class="form-inline mb-3">
+                    <div class="input-group">
+                        <input type="text" name="search" class="form-control" placeholder="Cari komoditas..." value="{{ request()->query('search') }}">
+                        <button type="submit" class="btn btn-primary">Cari</button>
+                    </div>
+                </form>
+                @if($pendingProduksiCount > 0)
                     <div class="alert alert-warning">
-                        Ada {{ $pendingCount }} data produksi pangan yang masih pending lebih dari 3 hari.
+                        Ada {{ $pendingProduksiCount }} data produksi pangan yang masih pending lebih dari 7 hari.
+                    </div>
+                @endif
+                @if($pendingPrediksiPangan > 0)
+                    <div class="alert alert-info">
+                        Ada {{ $pendingPrediksiPangan }} data prediksi pangan yang masih draft lebih dari 7 hari.
                     </div>
                 @endif
             </div>
@@ -36,7 +47,7 @@
         </div>
     </div>
     <!-- Grafik Harga -->
-    <div class="col-lg-12 grid-margin stretch-card">
+    <div class="col-lg-6 grid-margin stretch-card">
         <div class="card">
             <div class="card-body">
                 <h5 class="card-title">Rata-rata Harga Pangan per Bulan</h5>
@@ -44,10 +55,19 @@
             </div>
         </div>
     </div>
+    <!-- Grafik Prediksi -->
+    <div class="col-lg-6 grid-margin stretch-card">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Prediksi Pangan per Bulan</h5>
+                <canvas id="prediksiChart"></canvas>
+            </div>
+        </div>
+    </div>
 </div>
 
-<!-- JavaScript untuk Grafik -->
-<script src="{{ asset('assets/js/chart.js/Chart.min.js') }}"></script>
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
 <script>
     // Grafik Produksi
     new Chart(document.getElementById('produksiChart'), {
@@ -59,7 +79,13 @@
         options: {
             responsive: true,
             scales: {
-                y: { beginAtZero: true }
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Jumlah (Ton)'
+                    }
+                }
             }
         }
     });
@@ -70,7 +96,7 @@
         data: {
             labels: @json($cadanganLabels),
             datasets: [{
-                label: 'Total Cadangan',
+                label: 'Total Cadangan (Ton)',
                 data: @json($cadanganValues),
                 backgroundColor: 'rgba(54, 162, 235, 0.5)',
                 borderColor: 'rgba(54, 162, 235, 1)',
@@ -80,7 +106,13 @@
         options: {
             responsive: true,
             scales: {
-                y: { beginAtZero: true }
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Jumlah (Ton)'
+                    }
+                }
             }
         }
     });
@@ -95,9 +127,37 @@
         options: {
             responsive: true,
             scales: {
-                y: { beginAtZero: true }
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Harga (Rp/kg)'
+                    }
+                }
+            }
+        }
+    });
+
+    // Grafik Prediksi
+    new Chart(document.getElementById('prediksiChart'), {
+        type: 'line',
+        data: {
+            labels: @json($prediksiLabels),
+            datasets: @json($prediksiDatasets)
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Jumlah Prediksi (Ton)'
+                    }
+                }
             }
         }
     });
 </script>
+@endpush
 @endsection

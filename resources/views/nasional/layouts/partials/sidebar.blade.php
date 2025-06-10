@@ -42,6 +42,11 @@
             <a class="nav-link" href="{{ route('nasional.prediksi.index') }}">
                 <i class="mdi mdi-chart-line menu-icon"></i>
                 <span class="menu-title">Prediksi & Stok</span>
+                @if($pendingPrediksiPangan > 0 || $pendingProduksiCount > 0)
+                    <span class="badge badge-warning">
+                        {{ $pendingPrediksiPangan + $pendingProduksiCount }}
+                    </span>
+                @endif
             </a>
         </li>
         {{-- <li class="nav-item">

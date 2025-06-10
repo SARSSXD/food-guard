@@ -13,38 +13,52 @@ use App\Models\Wilayah;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Http\Request;
 
 class DashboardController extends Controller
 {
-    public function nasional()
+    public function nasional(Request $request)
     {
+        // Handle search query
+        $search = $request->query('search');
+
         // Data Produksi Pangan
-        $produksiPangan = ProduksiPangan::with(['region', 'creator'])
-            ->where('status_valid', 'terverifikasi')
-            ->orderBy('created_at', 'desc')
-            ->get();
+        $produksiQuery = ProduksiPangan::with(['region', 'creator'])
+            ->where('status_valid', 'terverifikasi');
+        if ($search) {
+            $produksiQuery->where('komoditas', 'LIKE', "%{$search}%");
+        }
+        $produksiPangan = $produksiQuery->orderBy('created_at', 'desc')->get();
 
         // Data Cadangan Pangan
-        $cadanganPangan = CadanganPangan::with('region')
-            ->where('status_valid', 'terverifikasi')
-            ->orderBy('created_at', 'desc')
-            ->get();
+        $cadanganQuery = CadanganPangan::with('region')
+            ->where('status_valid', 'terverifikasi');
+        if ($search) {
+            $cadanganQuery->where('komoditas', 'LIKE', "%{$search}%");
+        }
+        $cadanganPangan = $cadanganQuery->orderBy('created_at', 'desc')->get();
 
         // Data Harga Pangan
-        $hargaPangan = HargaPangan::with(['region', 'creator'])
-            ->orderBy('tanggal', 'desc')
-            ->get();
+        $hargaQuery = HargaPangan::with(['region', 'creator']);
+        if ($search) {
+            $hargaQuery->where('komoditas', 'LIKE', "%{$search}%");
+        }
+        $hargaPangan = $hargaQuery->orderBy('tanggal', 'desc')->get();
 
         // Data Distribusi Pangan
-        $distribusiPangan = DistribusiPangan::with(['region', 'creator'])
-            ->orderBy('tanggal_kirim', 'desc')
-            ->get();
+        $distribusiQuery = DistribusiPangan::with(['region', 'creator']);
+        if ($search) {
+            $distribusiQuery->where('komoditas', 'LIKE', "%{$search}%");
+        }
+        $distribusiPangan = $distribusiQuery->orderBy('tanggal_kirim', 'desc')->get();
 
         // Data Prediksi Pangan
-        $prediksiPangan = PrediksiPangan::with(['region', 'creator'])
-            ->where('status', 'disetujui')
-            ->orderBy('bulan_tahun', 'desc')
-            ->get();
+        $prediksiQuery = PrediksiPangan::with(['region', 'creator'])
+            ->where('status', 'disetujui');
+        if ($search) {
+            $prediksiQuery->where('komoditas', 'LIKE', "%{$search}%");
+        }
+        $prediksiPangan = $prediksiQuery->orderBy('bulan_tahun', 'desc')->get();
 
         // Data Artikel Gizi
         $artikelGizi = ArtikelGizi::with('author')
@@ -52,22 +66,41 @@ class DashboardController extends Controller
             ->get();
 
         // Grafik Produksi Pangan (Total Jumlah per Komoditas per Bulan)
-        $grafikProduksi = ProduksiPangan::selectRaw('komoditas, DATE_FORMAT(created_at, "%Y-%m") as bulan, SUM(jumlah) as total_jumlah')
+        $grafikProduksiQuery = ProduksiPangan::selectRaw('komoditas, DATE_FORMAT(created_at, "%Y-%m") as bulan, SUM(jumlah) as total_jumlah')
             ->whereYear('created_at', '<=', 2025)
-            ->where('status_valid', 'terverifikasi')
-            ->groupBy('komoditas', 'bulan')
+            ->where('status_valid', 'terverifikasi');
+        if ($search) {
+            $grafikProduksiQuery->where('komoditas', 'LIKE', "%{$search}%");
+        }
+        $grafikProduksi = $grafikProduksiQuery->groupBy('komoditas', 'bulan')
             ->orderBy('bulan')
             ->get();
 
         // Grafik Cadangan Pangan (Total Jumlah per Komoditas)
-        $grafikCadangan = CadanganPangan::selectRaw('komoditas, SUM(jumlah) as total_jumlah')
-            ->where('status_valid', 'terverifikasi')
-            ->groupBy('komoditas')
+        $grafikCadanganQuery = CadanganPangan::selectRaw('komoditas, SUM(jumlah) as total_jumlah')
+            ->where('status_valid', 'terverifikasi');
+        if ($search) {
+            $grafikCadanganQuery->where('komoditas', 'LIKE', "%{$search}%");
+        }
+        $grafikCadangan = $grafikCadanganQuery->groupBy('komoditas')
             ->get();
 
         // Grafik Harga Pangan (Rata-rata Harga per Komoditas per Bulan)
-        $grafikHarga = HargaPangan::selectRaw('komoditas, DATE_FORMAT(tanggal, "%Y-%m") as bulan, AVG(harga_per_kg) as avg_harga')
-            ->groupBy('komoditas', 'bulan')
+        $grafikHargaQuery = HargaPangan::selectRaw('komoditas, DATE_FORMAT(tanggal, "%Y-%m") as bulan, AVG(harga_per_kg) as avg_harga');
+        if ($search) {
+            $grafikHargaQuery->where('komoditas', 'LIKE', "%{$search}%");
+        }
+        $grafikHarga = $grafikHargaQuery->groupBy('komoditas', 'bulan')
+            ->orderBy('bulan')
+            ->get();
+
+        // Grafik Prediksi Pangan (Total Jumlah per Bulan)
+        $grafikPrediksiQuery = PrediksiPangan::selectRaw('DATE_FORMAT(bulan_tahun, "%Y-%m") as bulan, SUM(jumlah) as total_jumlah')
+            ->where('status', 'disetujui');
+        if ($search) {
+            $grafikPrediksiQuery->where('komoditas', 'LIKE', "%{$search}%");
+        }
+        $grafikPrediksi = $grafikPrediksiQuery->groupBy('bulan')
             ->orderBy('bulan')
             ->get();
 
@@ -128,15 +161,36 @@ class DashboardController extends Controller
             ];
         }
 
-        // Notifikasi data pending lebih dari 3 hari
-        $pendingCount = ProduksiPangan::where('status_valid', 'pending')
-            ->where('created_at', '<', Carbon::now()->subDays(3))
+        // Grafik Prediksi
+        $prediksiLabels = $grafikPrediksi->pluck('bulan')->unique()->sort()->values()->toArray();
+        $prediksiDatasets = [
+            [
+                'label' => 'Prediksi Total',
+                'data' => $grafikPrediksi->pluck('total_jumlah')->map(fn($value) => floatval($value))->toArray(),
+                'borderColor' => 'rgba(153, 102, 255, 1)',
+                'fill' => false
+            ]
+        ];
+
+        // Notifikasi data pending lebih dari 7 hari
+        $pendingProduksiCount = ProduksiPangan::where('status_valid', 'pending')
+            ->where('created_at', '<', Carbon::now()->subDays(7))
             ->count();
 
-        Log::info('Pending Count:', ['count' => $pendingCount]);
-        Log::info('Produksi Datasets:', $produksiDatasets);
-        Log::info('Cadangan Labels:', $cadanganLabels);
-        Log::info('Harga Datasets:', $hargaDatasets);
+        $pendingPrediksiPangan = PrediksiPangan::where('status', 'draft')
+            ->where('created_at', '<', Carbon::now()->subDays(7))
+            ->count();
+
+        // Log data untuk debugging
+        Log::info('Dashboard Data:', [
+            'pending_produksi_count' => $pendingProduksiCount,
+            'pending_prediksi_count' => $pendingPrediksiPangan,
+            'produksi_datasets' => $produksiDatasets,
+            'cadangan_labels' => $cadanganLabels,
+            'harga_datasets' => $hargaDatasets,
+            'prediksi_datasets' => $prediksiDatasets,
+            'search_query' => $search
+        ]);
 
         return view('nasional.dashboard', compact(
             'produksiPangan',
@@ -151,7 +205,10 @@ class DashboardController extends Controller
             'cadanganValues',
             'hargaLabels',
             'hargaDatasets',
-            'pendingCount'
+            'prediksiLabels',
+            'prediksiDatasets',
+            'pendingProduksiCount',
+            'pendingPrediksiPangan'
         ));
     }
 
