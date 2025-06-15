@@ -8,6 +8,8 @@ use App\Models\PesanHargaPangan;
 use App\Models\Wilayah;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\NasionalHargaPanganExport;
 
 class NasionalHargaPanganController extends Controller
 {
@@ -42,15 +44,16 @@ class NasionalHargaPanganController extends Controller
 
     public function kirimPesan(Request $request)
     {
+        dd ($request->all());
         $request->validate([
-            'wilayah' => 'required|string|max:255',
+            'id_wilayah' => 'required|exists:wilayah,id',
             'komoditas' => 'required|string|max:255',
-            'tahun' => 'required|string|max:4',
+            'tahun' => 'required|string|size:4',
             'pesan' => 'required|string|max:1000',
         ]);
 
         PesanHargaPangan::create([
-            'wilayah' => $request->wilayah,
+            'id_wilayah' => $request->id_wilayah,
             'komoditas' => $request->komoditas,
             'tahun' => $request->tahun,
             'pesan' => $request->pesan,
@@ -58,5 +61,22 @@ class NasionalHargaPanganController extends Controller
         ]);
 
         return redirect()->route('nasional.harga.index')->with('success', 'Pesan berhasil dikirim.');
+    }
+
+    public function export(Request $request)
+    {
+        $query = HargaPangan::with(['region', 'creator']);
+
+        if ($wilayah = $request->input('wilayah')) {
+            $query->where('id_lokasi', $wilayah);
+        }
+
+        if ($komoditas = $request->input('komoditas')) {
+            $query->where('komoditas', 'LIKE', "%{$komoditas}%");
+        }
+
+        $data = $query->get();
+
+        return Excel::download(new NasionalHargaPanganExport($data), 'harga_pangan_' . date('Ymd') . '.xlsx');
     }
 }

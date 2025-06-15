@@ -138,7 +138,10 @@ class DashboardController extends Controller
         // Grafik Cadangan
         $cadanganLabels = $grafikCadangan->pluck('komoditas')->toArray();
         $cadanganValues = $grafikCadangan->pluck('total_jumlah')->map(fn($value) => floatval($value))->toArray();
-
+        if (empty($cadanganLabels)) {
+            $cadanganLabels = ['Tidak ada data'];
+            $cadanganValues = [0];
+        }
         // Grafik Harga
         $hargaLabels = $grafikHarga->pluck('bulan')->unique()->sort()->values()->toArray();
         $komoditasHarga = $grafikHarga->pluck('komoditas')->unique()->toArray();

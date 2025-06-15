@@ -13,7 +13,7 @@ class ViewComposerServiceProvider extends ServiceProvider
 {
     public function boot()
     {
-        View::composer(['nasional.layouts.app', 'nasional.partials.sidebar'], function ($view) {
+        View::composer(['nasional.layouts.app', 'nasional.layouts.partials.sidebar', 'nasional.dashboard'], function ($view) {
             try {
                 $pendingProduksiCount = ProduksiPangan::where('status_valid', 'pending')
                     ->where('created_at', '<', Carbon::now()->subDays(7))

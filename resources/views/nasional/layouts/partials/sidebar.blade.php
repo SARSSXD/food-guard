@@ -39,14 +39,15 @@
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="{{ route('nasional.prediksi.index') }}">
+            <a class="nav-link" href="{{ route('nasional.prediksi.index') }}" data-bs-toggle="tooltip"
+                data-bs-placement="right">
                 <i class="mdi mdi-chart-line menu-icon"></i>
                 <span class="menu-title">Prediksi & Stok</span>
-                @if($pendingPrediksiPangan > 0 || $pendingProduksiCount > 0)
+                {{-- @if ($pendingProduksiCount > 0 || $pendingPrediksiPangan > 0)
                     <span class="badge badge-warning">
-                        {{ $pendingPrediksiPangan + $pendingProduksiCount }}
+                        {{ $pendingProduksiCount + $pendingPrediksiPangan }}
                     </span>
-                @endif
+                @endif --}}
             </a>
         </li>
         {{-- <li class="nav-item">
@@ -57,3 +58,13 @@
         </li> --}}
     </ul>
 </nav>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Inisialisasi tooltip Bootstrap
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.forEach(function(tooltipTriggerEl) {
+            new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    });
+</script>

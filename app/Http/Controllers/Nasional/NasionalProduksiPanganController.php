@@ -14,39 +14,52 @@ class NasionalProduksiPanganController extends Controller
 {
     public function index(Request $request)
     {
-        // Ambil id_lokasi representatif untuk setiap provinsi (id pertama)
+        // Ambil provinsi unik dan ID wilayah agregat (MIN(id) per provinsi)
+        $wilayahList = Wilayah::select('provinsi', DB::raw('MIN(id) as id'))
+            ->groupBy('provinsi')
+            ->orderBy('provinsi')
+            ->get();
+
+        // Ambil daftar tahun dan komoditas
+        $tahunList = ProduksiPangan::select('periode')
+            ->distinct()
+            ->orderBy('periode', 'desc')
+            ->pluck('periode');
+        $komoditasList = ProduksiPangan::select('komoditas')
+            ->distinct()
+            ->orderBy('komoditas')
+            ->pluck('komoditas');
+
+        // Hitung jumlah pengajuan pending
         $provinsiLokasi = Wilayah::select('provinsi', DB::raw('MIN(id) as id_lokasi'))
             ->groupBy('provinsi')
             ->pluck('id_lokasi', 'provinsi');
-
-        $query = ProduksiPangan::with(['region', 'creator'])
-            ->where('status_valid', 'terverifikasi')
-            ->whereIn('id_lokasi', $provinsiLokasi); // Hanya record agregat
-
-        if ($request->has('wilayah') && $request->wilayah != '') {
-            $query->where('id_lokasi', $request->wilayah);
-        }
-
-        if ($request->has('tahun') && $request->tahun != '') {
-            $query->where('periode', $request->tahun);
-        }
-
-        if ($request->has('komoditas') && $request->komoditas != '') {
-            $query->where('komoditas', $request->komoditas);
-        }
-
-        $produksiPangan = $query->orderBy('periode', 'desc')->get();
-
-        $wilayahList = Wilayah::select('id', 'provinsi')
-            ->distinct('provinsi')
-            ->orderBy('provinsi')
-            ->get();
-        $tahunList = range(2015, 2025);
-        $komoditasList = ProduksiPangan::select('komoditas')->distinct()->pluck('komoditas');
-
         $pendingCount = ProduksiPangan::where('status_valid', 'pending')
             ->whereIn('id_lokasi', $provinsiLokasi)
             ->count();
+
+        // Query data agregat
+        $aggregateIds = Wilayah::select(DB::raw('MIN(id) as id'))
+            ->groupBy('provinsi')
+            ->pluck('id');
+
+        $query = ProduksiPangan::with('region')
+            ->whereIn('id_lokasi', $aggregateIds);
+
+        // Filter berdasarkan input
+        if ($wilayah = $request->query('wilayah')) {
+            $query->where('id_lokasi', $wilayah);
+        }
+
+        if ($tahun = $request->query('tahun')) {
+            $query->where('periode', $tahun);
+        }
+
+        if ($komoditas = $request->query('komoditas')) {
+            $query->where('komoditas', 'LIKE', "%{$komoditas}%");
+        }
+
+        $produksiPangan = $query->orderBy('periode', 'desc')->get();
 
         return view('nasional.produksi.index', compact(
             'produksiPangan',
@@ -114,27 +127,28 @@ class NasionalProduksiPanganController extends Controller
 
     public function export(Request $request)
     {
-        // Ambil id_lokasi representatif untuk setiap provinsi
-        $provinsiLokasi = Wilayah::select('provinsi', DB::raw('MIN(id) as id_lokasi'))
+        // Ambil data agregat untuk ekspor
+        $aggregateIds = Wilayah::select(DB::raw('MIN(id) as id'))
             ->groupBy('provinsi')
-            ->pluck('id_lokasi', 'provinsi');
+            ->pluck('id');
 
-        $query = ProduksiPangan::with(['region', 'creator'])
-            ->where('status_valid', 'terverifikasi')
-            ->whereIn('id_lokasi', $provinsiLokasi);
+        $query = ProduksiPangan::with('region')
+            ->whereIn('id_lokasi', $aggregateIds);
 
-        if ($request->has('wilayah') && $request->wilayah != '') {
-            $query->where('id_lokasi', $request->wilayah);
+        if ($wilayah = $request->input('wilayah')) {
+            $query->where('id_lokasi', $wilayah);
         }
 
-        if ($request->has('tahun') && $request->tahun != '') {
-            $query->where('periode', $request->tahun);
+        if ($tahun = $request->input('tahun')) {
+            $query->where('periode', $tahun);
         }
 
-        if ($request->has('komoditas') && $request->komoditas != '') {
-            $query->where('komoditas', $request->komoditas);
+        if ($komoditas = $request->input('komoditas')) {
+            $query->where('komoditas', 'LIKE', "%{$komoditas}%");
         }
 
-        return Excel::download(new NasionalProduksiPanganExport($query->get()), 'produksi_pangan_' . date('Ymd') . '.csv');
+        $data = $query->get();
+
+        return Excel::download(new NasionalProduksiPanganExport($data), 'produksi_pangan_' . date('Ymd') . '.xlsx');
     }
 }
