@@ -14,30 +14,52 @@
         <!-- Nav -->
         <nav id="navmenu" class="navmenu">
             <ul>
-                <li><a href="{{ route('landingpage') }}" class="active">Dashboard</a></li>
+                <li><a href="{{ route('landingpage') }}"
+                        class="{{ request()->routeIs('landingpage') ? 'active' : '' }}">Dashboard</a></li>
 
                 <li class="dropdown">
-                    <a onclick="toggleDropdown(event)">Data Pangan <i class="bi bi-chevron-down"></i></a>
+                    <a onclick="toggleDropdown(event)"
+                        class="{{ request()->routeIs(['cadangan.index', 'harga-pangan.index', 'distribusi.index']) ? 'active' : '' }}">
+                        Data Pangan <i class="bi bi-chevron-down"></i>
+                    </a>
                     <ul>
-                        <li><a href="#">Data Pangan Indonesia</a></li>
-                        <li><a href="#">Data Monitoring Harga Pangan</a></li>
-                        <li><a href="#">Data Distribusi Pangan</a></li>
+                        <li><a href="{{ route('cadangan.index') }}"
+                                class="{{ request()->routeIs('cadangan.index') ? 'active' : '' }}">Data Pangan
+                                Indonesia</a></li>
+                        <li><a href="{{ route('harga-pangan.index') }}"
+                                class="{{ request()->routeIs('harga-pangan.index') ? 'active' : '' }}">Data Monitoring
+                                Harga Pangan</a></li>
+                        <li><a href="{{ route('distribusi.index') }}"
+                                class="{{ request()->routeIs('distribusi.index') ? 'active' : '' }}">Data Distribusi
+                                Pangan</a></li>
                     </ul>
                 </li>
 
                 <li class="dropdown">
-                    <a onclick="toggleDropdown(event)">Prediksi & Edukasi <i class="bi bi-chevron-down"></i></a>
+                    <a onclick="toggleDropdown(event)"
+                        class="{{ request()->routeIs(['prediksi.index', 'edukasi.index', 'edukasi.show']) ? 'active' : '' }}">
+                        Prediksi & Edukasi <i class="bi bi-chevron-down"></i>
+                    </a>
                     <ul>
-                        <li><a href="#">Prediksi Pangan</a></li>
-                        <li><a href="#">Edukasi Gizi & Resep</a></li>
+                        <li><a href="{{ route('prediksi.index') }}"
+                                class="{{ request()->routeIs('prediksi.index') ? 'active' : '' }}">Prediksi Pangan</a>
+                        </li>
+                        <li><a href="{{ route('edukasi.index') }}"
+                                class="{{ request()->routeIs(['edukasi.index', 'edukasi.show']) ? 'active' : '' }}">Edukasi
+                                Gizi & Resep</a></li>
                     </ul>
                 </li>
 
                 <li class="dropdown">
-                    <a onclick="toggleDropdown(event)">Profil <i class="bi bi-chevron-down"></i></a>
+                    <a onclick="toggleDropdown(event)"
+                        class="{{ request()->routeIs(['register', 'login']) ? 'active' : '' }}">
+                        Profil <i class="bi bi-chevron-down"></i>
+                    </a>
                     <ul>
-                        <li><a href="{{ route('register') }}">Register</a></li>
-                        <li><a href="{{ route('login') }}">Login</a></li>
+                        <li><a href="{{ route('register') }}"
+                                class="{{ request()->routeIs('register') ? 'active' : '' }}">Register</a></li>
+                        <li><a href="{{ route('login') }}"
+                                class="{{ request()->routeIs('login') ? 'active' : '' }}">Login</a></li>
                     </ul>
                 </li>
             </ul>

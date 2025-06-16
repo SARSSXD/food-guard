@@ -12,7 +12,6 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\Nasional\NasionalCadanganPanganController;
 use App\Http\Controllers\Nasional\NasionalDistribusiPanganController;
 use App\Http\Controllers\Nasional\NasionalHargaPanganController;
-use App\Http\Controllers\Nasional\NasionalPrediksiPanganController;
 use App\Http\Controllers\Nasional\NasionalProduksiPanganController;
 use Illuminate\Support\Facades\Route;
 
@@ -25,10 +24,18 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 // Rute Dashboard Publik untuk User Umum
 Route::get('/', [HomeController::class, 'index'])->name('landingpage');
+Route::get('/cadangan', [HomeController::class, 'cadanganIndex'])->name('cadangan.index');
+Route::post('/cadangan/export', [HomeController::class, 'cadanganExport'])->name('cadangan.export');
+Route::get('/harga', [HomeController::class, 'hargaIndex'])->name('harga.index');
+Route::get('/harga-pangan', [HomeController::class, 'hargaIndex'])->name('harga-pangan.index');
+Route::get('/distribusi', [HomeController::class, 'distribusiIndex'])->name('distribusi.index');
+Route::get('/prediksi', [HomeController::class, 'prediksiIndex'])->name('prediksi.index');
+Route::get('/edukasi', [HomeController::class, 'edukasiIndex'])->name('edukasi.index');
+Route::get('/edukasi/{id}', [HomeController::class, 'edukasiShow'])->name('edukasi.show');
 
 // Rute Dashboard Nasional dengan Autentikasi
 Route::middleware(['auth', 'role:nasional'])->group(function () {
-    Route::get('/nasional/dashboard', [DashboardController::class, 'nasional'])->name('nasional.dashboard');
+    Route::get('/nasional/dashboard', [App\Http\Controllers\DashboardController::class, 'nasional'])->name('nasional.dashboard');
 
     // Produksi Pangan
     Route::get('/nasional/produksi', [NasionalProduksiPanganController::class, 'index'])->name('nasional.produksi.index');
@@ -54,18 +61,9 @@ Route::middleware(['auth', 'role:nasional'])->group(function () {
     // Route::get('/nasional/distribusi/{id}', [NasionalDistribusiPanganController::class, 'show'])->name('nasional.distribusi.show');
 
     // Prediksi Pangan
-    Route::get('/nasional/prediksi', [NasionalPrediksiPanganController::class, 'index'])->name('nasional.prediksi.index');
-    Route::post('/nasional/prediksi', [NasionalPrediksiPanganController::class, 'store'])->name('nasional.prediksi.store');
-    Route::patch('/nasional/prediksi/{prediksiPangan}', [NasionalPrediksiPanganController::class, 'update'])->name('nasional.prediksi.update');
-    Route::post('/nasional/prediksi/kirim-pesan', [NasionalPrediksiPanganController::class, 'kirimPesan'])->name('nasional.prediksi.kirim-pesan');
-
-    // // Artikel Gizi
-    // Route::get('/nasional/artikel', [NasionalArtikelGiziController::class, 'index'])->name('nasional.artikel.index');
-    // Route::get('/nasional/artikel/create', [NasionalArtikelGiziController::class, 'create'])->name('nasional.artikel.create');
-    // Route::post('/nasional/artikel', [NasionalArtikelGiziController::class, 'store'])->name('nasional.artikel.store');
-    // Route::get('/nasional/artikel/{id}/edit', [NasionalArtikelGiziController::class, 'edit'])->name('nasional.artikel.edit');
-    // Route::put('/nasional/artikel/{id}', [NasionalArtikelGiziController::class, 'update'])->name('nasional.artikel.update');
-    // Route::delete('/nasional/artikel/{id}', [NasionalArtikelGiziController::class, 'destroy'])->name('nasional.artikel.destroy');
+    Route::get('/nasional/prediksi', [App\Http\Controllers\Nasional\NasionalPrediksiPanganController::class, 'index'])->name('nasional.prediksi.index');
+    Route::post('/nasional/prediksi/message', [App\Http\Controllers\Nasional\NasionalPrediksiPanganController::class, 'storeMessage'])->name('nasional.prediksi.message');
+    Route::post('/nasional/prediksi/export', [App\Http\Controllers\Nasional\NasionalPrediksiPanganController::class, 'export'])->name('nasional.prediksi.export');
 
     // Distribusi Pangan
     Route::get('/nasional/distribusi', [App\Http\Controllers\Nasional\NasionalDistribusiPanganController::class, 'index'])->name('nasional.distribusi.index');

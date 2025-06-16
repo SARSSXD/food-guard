@@ -3,60 +3,48 @@
 namespace Database\Seeders;
 
 use App\Models\PesanPrediksiPangan;
-use App\Models\User;
 use App\Models\Wilayah;
+use App\Models\User;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Carbon;
 
 class PesanPrediksiPanganSeeder extends Seeder
 {
     public function run()
     {
-        $adminNasional = User::where('role', 'nasional')->first();
-        $adminDaerah = User::where('email', 'admin.jawa-timur.surabaya@region.foodguard.com')->first();
-        $wilayahSurabaya = Wilayah::where('provinsi', 'Jawa Timur')->where('kota', 'Surabaya')->first();
-
-        $pesanPrediksi = [
-            [
-                'provinsi' => 'Jawa Timur',
-                'komoditas' => 'Beras',
-                'bulan_tahun' => '2025-07',
-                'pesan' => 'Prediksi produksi beras di Surabaya meningkat 10% dibandingkan bulan sebelumnya.',
-                'created_by' => $adminDaerah->id,
-                'created_at' => Carbon::now(),
-                'updated_at' => Carbon::now(),
-            ],
-            [
-                'provinsi' => 'Jawa Timur',
-                'komoditas' => 'Jagung',
-                'bulan_tahun' => '2025-07',
-                'pesan' => 'Prediksi cadangan jagung menurun karena distribusi ke wilayah lain meningkat.',
-                'created_by' => $adminDaerah->id,
-                'created_at' => Carbon::now()->subDays(3),
-                'updated_at' => Carbon::now()->subDays(3),
-            ],
-            [
-                'provinsi' => 'Jawa Barat',
-                'komoditas' => 'Beras',
-                'bulan_tahun' => '2025-08',
-                'pesan' => 'Prediksi produksi beras stabil dengan jumlah sekitar 120 ton.',
-                'created_by' => $adminNasional->id,
-                'created_at' => Carbon::now()->subDays(4),
-                'updated_at' => Carbon::now()->subDays(4),
-            ],
-            [
-                'provinsi' => 'DKI Jakarta',
-                'komoditas' => 'Kedelai',
-                'bulan_tahun' => '2025-08',
-                'pesan' => 'Prediksi cadangan kedelai menurun karena tingginya permintaan industri tempe.',
-                'created_by' => $adminNasional->id,
-                'created_at' => Carbon::now()->subDays(6),
-                'updated_at' => Carbon::now()->subDays(6),
-            ],
+        $commodities = ['Beras', 'Padi', 'Jagung', 'Gandum', 'Sagu'];
+        $users = User::where('role', 'nasional')->pluck('id')->toArray();
+        $months = ['Januari 2024', 'Juni 2024', 'Desember 2024', 'Januari 2025', 'Juni 2025', 'Desember 2025'];
+        $messages = [
+            'Harap perhatikan prediksi ini untuk perencanaan stok.',
+            'Revisi data diperlukan berdasarkan hasil prediksi terbaru.',
+            'Prediksi menunjukkan potensi kekurangan, mohon tindak lanjuti.',
+            'Data prediksi ini telah disetujui, silakan implementasikan.',
         ];
 
-        foreach ($pesanPrediksi as $pesan) {
-            PesanPrediksiPangan::create($pesan);
+        // Ambil 5 provinsi unik untuk pengujian
+        $provinsis = Wilayah::select('provinsi')
+            ->distinct()
+            ->inRandomOrder()
+            ->take(5)
+            ->pluck('provinsi');
+
+        foreach ($provinsis as $provinsi) {
+            foreach ($commodities as $commodity) {
+                foreach ($months as $month) {
+                    // Buat 1-2 pesan acak per kombinasi
+                    if (rand(0, 1)) {
+                        PesanPrediksiPangan::create([
+                            'provinsi' => $provinsi,
+                            'komoditas' => $commodity,
+                            'bulan_tahun' => $month,
+                            'pesan' => $messages[array_rand($messages)],
+                            'created_by' => $users[array_rand($users)],
+                            'created_at' => now(),
+                            'updated_at' => now(),
+                        ]);
+                    }
+                }
+            }
         }
     }
 }

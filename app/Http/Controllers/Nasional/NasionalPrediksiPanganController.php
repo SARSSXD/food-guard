@@ -7,137 +7,100 @@ use App\Models\PrediksiPangan;
 use App\Models\PesanPrediksiPangan;
 use App\Models\Wilayah;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\NasionalPrediksiPanganExport;
+use Illuminate\Support\Facades\DB;
 
 class NasionalPrediksiPanganController extends Controller
 {
     public function index(Request $request)
     {
-        $query = PrediksiPangan::with(['region', 'creator']);
+        // Ambil provinsi unik dan ID wilayah agregat (MIN(id) per provinsi)
+        $wilayahList = Wilayah::select('provinsi', DB::raw('MIN(id) as id'))
+            ->groupBy('provinsi')
+            ->orderBy('provinsi')
+            ->get();
 
-        if ($provinsi = $request->query('provinsi')) {
-            $query->where('id_lokasi', $provinsi);
-        }
-        if ($komoditas = $request->query('komoditas')) {
-            $query->where('komoditas', 'LIKE', "%{$komoditas}%");
-        }
-        if ($jenis = $request->query('jenis')) {
-            $query->where('jenis', $jenis);
+        // Ambil daftar tahun, komoditas, dan jenis
+        $tahunList = PrediksiPangan::select(DB::raw('YEAR(bulan_tahun) as tahun'))
+            ->distinct()
+            ->orderBy('tahun', 'desc')
+            ->pluck('tahun');
+        $komoditasList = PrediksiPangan::select('komoditas')
+            ->distinct()
+            ->orderBy('komoditas')
+            ->pluck('komoditas');
+        $jenisList = ['produksi', 'cadangan'];
+
+        // Query data prediksi agregat
+        $aggregateIds = Wilayah::select(DB::raw('MIN(id) as id'))
+            ->groupBy('provinsi')
+            ->pluck('id');
+
+        $query = PrediksiPangan::with('region')
+            ->whereIn('id_lokasi', $aggregateIds);
+
+        // Filter berdasarkan input
+        if ($wilayah = $request->query('wilayah')) {
+            $query->where('id_lokasi', $wilayah);
         }
         if ($tahun = $request->query('tahun')) {
             $query->whereYear('bulan_tahun', $tahun);
         }
-
-        $prediksi = $query->orderBy('bulan_tahun', 'desc')->get();
-        $wilayahList = Wilayah::select('id', 'provinsi')->distinct('provinsi')->orderBy('provinsi')->get();
-        $komoditasList = PrediksiPangan::select('komoditas')->distinct()->pluck('komoditas');
-        $jenisList = ['produksi', 'cadangan'];
-        $tahunList = range(2020, date('Y') + 1); // Dynamic year range
-
-        // Data untuk grafik
-        $chartData = $this->getChartData($request->provinsi, $request->komoditas, $request->jenis);
-
-        return view('nasional.prediksi.index', compact(
-            'prediksi',
-            'wilayahList',
-            'komoditasList',
-            'jenisList',
-            'tahunList',
-            'chartData'
-        ));
-    }
-
-    private function getChartData($provinsi, $komoditas, $jenis)
-    {
-        $query = PrediksiPangan::selectRaw('DATE_FORMAT(bulan_tahun, "%Y-%m") as month, SUM(jumlah) as total')
-            ->groupBy('month')
-            ->orderBy('month');
-
-        if ($provinsi) {
-            $query->where('id_lokasi', $provinsi);
-        }
-        if ($komoditas) {
+        if ($komoditas = $request->query('komoditas')) {
             $query->where('komoditas', $komoditas);
         }
-        if ($jenis) {
+        if ($jenis = $request->query('jenis')) {
             $query->where('jenis', $jenis);
         }
 
-        $data = $query->get();
+        $prediksiPangan = $query->orderBy('bulan_tahun', 'desc')->get();
 
-        return [
-            'labels' => $data->pluck('month'),
-            'datasets' => [
-                [
-                    'label' => 'Jumlah Prediksi (Ton)',
-                    'data' => $data->pluck('total'),
-                    'borderColor' => 'rgba(54, 162, 235, 1)',
-                    'backgroundColor' => 'rgba(54, 162, 235, 0.2)',
-                    'fill' => true,
-                ]
-            ]
-        ];
-    }
+        // Data untuk grafik (total jumlah per komoditas per tahun, skala nasional)
+        $chartData = PrediksiPangan::whereIn('id_lokasi', $aggregateIds)
+            ->whereIn('komoditas', ['Beras', 'Padi', 'Jagung', 'Gandum', 'Sagu'])
+            ->select(
+                DB::raw('YEAR(bulan_tahun) as tahun'),
+                'komoditas',
+                DB::raw('SUM(jumlah) as total_jumlah')
+            )
+            ->groupBy('tahun', 'komoditas')
+            ->orderBy('tahun')
+            ->get();
 
-    public function store(Request $request)
-    {
-        $request->validate([
-            'jenis' => 'required|in:produksi,cadangan',
-            'komoditas' => 'required|string|max:255',
-            'id_lokasi' => 'required|exists:wilayah,id',
-            'bulan_tahun' => 'required|date_format:Y-m-01',
-            'jumlah' => 'required|numeric|min:0',
-            'metode' => 'required|string|max:255',
-            'status' => 'required|in:draft,disetujui,revisi',
-        ]);
-
-        PrediksiPangan::create([
-            'jenis' => $request->jenis,
-            'komoditas' => $request->komoditas,
-            'id_lokasi' => $request->id_lokasi,
-            'bulan_tahun' => $request->bulan_tahun,
-            'jumlah' => $request->jumlah,
-            'metode' => $request->metode,
-            'status' => $request->status,
-            'created_by' => Auth::id(),
-        ]);
-
-        return redirect()->route('nasional.prediksi.index')->with('success', 'Prediksi berhasil ditambahkan.');
-    }
-
-    public function update(Request $request, $id)
-    {
-        $prediksi = PrediksiPangan::findOrFail($id);
-
-        $request->validate([
-            'status' => 'required|in:draft,disetujui,revisi',
-            'pesan' => 'required_if:status,revisi|string|max:1000',
-        ]);
-
-        $prediksi->update([
-            'status' => $request->status,
-        ]);
-
-        if ($request->status === 'revisi' && $request->pesan) {
-            PesanPrediksiPangan::create([
-                'provinsi' => $prediksi->region->provinsi,
-                'komoditas' => $prediksi->komoditas,
-                'bulan_tahun' => \Carbon\Carbon::parse($prediksi->bulan_tahun)->format('Y-m'),
-                'pesan' => $request->pesan,
-                'created_by' => Auth::id(),
-            ]);
+        $chartLabels = $chartData->pluck('tahun')->unique()->sort()->values();
+        $chartDatasets = [];
+        foreach (['Beras', 'Padi', 'Jagung', 'Gandum', 'Sagu'] as $komoditas) {
+            $data = $chartLabels->map(function ($tahun) use ($chartData, $komoditas) {
+                return $chartData->where('tahun', $tahun)->where('komoditas', $komoditas)->sum('total_jumlah');
+            })->toArray();
+            $chartDatasets[] = [
+                'label' => $komoditas,
+                'data' => $data,
+                'backgroundColor' => sprintf('rgba(%d, %d, %d, 0.5)', rand(0, 255), rand(0, 255), rand(0, 255)),
+                'borderColor' => sprintf('rgba(%d, %d, %d, 1)', rand(0, 255), rand(0, 255), rand(0, 255)),
+                'borderWidth' => 1,
+            ];
         }
 
-        return redirect()->route('nasional.prediksi.index')->with('success', 'Status prediksi berhasil diupdate.');
+        return view('nasional.prediksi.index', compact(
+            'prediksiPangan',
+            'wilayahList',
+            'tahunList',
+            'komoditasList',
+            'jenisList',
+            'chartLabels',
+            'chartDatasets'
+        ));
     }
 
-    public function kirimPesan(Request $request)
+    public function storeMessage(Request $request)
     {
         $request->validate([
-            'provinsi' => 'required|string|max:255',
-            'komoditas' => 'required|string|max:255',
-            'bulan_tahun' => 'required|string|max:7',
-            'pesan' => 'required|string|max:1000',
+            'provinsi' => 'required|string',
+            'komoditas' => 'required|string',
+            'bulan_tahun' => 'required|string',
+            'pesan' => 'required|string',
         ]);
 
         PesanPrediksiPangan::create([
@@ -145,9 +108,36 @@ class NasionalPrediksiPanganController extends Controller
             'komoditas' => $request->komoditas,
             'bulan_tahun' => $request->bulan_tahun,
             'pesan' => $request->pesan,
-            'created_by' => Auth::id(),
+            'created_by' => auth()->id(),
         ]);
 
         return redirect()->route('nasional.prediksi.index')->with('success', 'Pesan berhasil dikirim.');
+    }
+
+    public function export(Request $request)
+    {
+        $aggregateIds = Wilayah::select(DB::raw('MIN(id) as id'))
+            ->groupBy('provinsi')
+            ->pluck('id');
+
+        $query = PrediksiPangan::with('region')
+            ->whereIn('id_lokasi', $aggregateIds);
+
+        if ($wilayah = $request->input('wilayah')) {
+            $query->where('id_lokasi', $wilayah);
+        }
+        if ($tahun = $request->input('tahun')) {
+            $query->whereYear('bulan_tahun', $tahun);
+        }
+        if ($komoditas = $request->input('komoditas')) {
+            $query->where('komoditas', $komoditas);
+        }
+        if ($jenis = $request->input('jenis')) {
+            $query->where('jenis', $jenis);
+        }
+
+        $data = $query->get();
+
+        return Excel::download(new NasionalPrediksiPanganExport($data), 'prediksi_pangan_' . date('Ymd') . '.xlsx');
     }
 }

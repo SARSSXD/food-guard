@@ -36,6 +36,7 @@
     @include('user.layouts.partials.navbar')
 
     <main class="main">
+        @include('user.layouts.partials.hero')
         @yield('content')
     </main>
 
